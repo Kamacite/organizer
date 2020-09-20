@@ -1,5 +1,4 @@
 __pycache__
-sched_venv
-sample_items
-schedule.db
-test.py
+./models/__pycache__
+./resources/__pycache__
+*.db
