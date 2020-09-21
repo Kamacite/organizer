@@ -17,7 +17,12 @@ class Login(Resource):
         content = request.json
         username = content['username']
         password = content['password']
-        user = self.db.session.query(User).filter(User.username == username).one()
+        try:
+            user = self.db.session.query(User).filter(User.username == username).one()
+        except:
+            resp = jsonify({'login': False})
+            resp.status_code = 401
+            return resp
         if user and pwd_context.verify(password, user.password_hash):
             
             access_token = create_access_token(identity=user.id)
