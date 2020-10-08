@@ -3,7 +3,7 @@ from flask_restful import Resource
 from flask_jwt_extended import (
     create_access_token,jwt_refresh_token_required, 
     create_refresh_token,set_access_cookies,
-    set_refresh_cookies, unset_jwt_cookies
+    set_refresh_cookies, unset_jwt_cookies, get_jwt_identity
 )
 from passlib.apps import custom_app_context as pwd_context
 from models.user_models import User
@@ -39,6 +39,17 @@ class Login(Resource):
             resp = jsonify({'login': False})
             resp.status_code = 401
             return resp
+
+class Refresh(Resource):
+    @jwt_refresh_token_required
+    def post(self):
+        user_id = get_jwt_identity()
+        access_token = create_access_token(identity=user_id)
+        resp = jsonify({'refresh': True})
+        resp.status_code = 200
+        set_access_cookies(resp, access_token)
+        return resp
+
 
 class Logout(Resource):
     def post(self):

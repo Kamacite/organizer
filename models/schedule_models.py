@@ -2,9 +2,9 @@ import sqlalchemy as sql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-Base = declarative_base()
+ScheduleBase = declarative_base()
 
-class Item(Base):
+class Item(ScheduleBase):
     __tablename__ = 'items'
     id = sql.Column(sql.Integer, primary_key=True)
     title = sql.Column(sql.String(length=32))

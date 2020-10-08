@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 # Resource Imports
 from resources.auth import *
 from resources.schedule import *
+from resources.project import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,6 +21,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'or
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Configure JWT to use cookies and csrf. Change cookie to secure when not developing.
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_SESSION_COOKIE'] = False
 app.config['JWT_COOKIE_SECURE'] = False
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_SECRET_KEY'] = 'change me'
@@ -32,7 +34,19 @@ jwt = JWTManager(app)
 ### AUTH Routes ###
 api.add_resource(Login, '/login',
     resource_class_kwargs={ 'db': db })
+api.add_resource(Refresh, '/refresh')
 api.add_resource(Logout, '/logout')
+
+### Project Routes ###
+api.add_resource(Projects, '/projects',
+    resource_class_kwargs={ 'db': db })
+api.add_resource(Project, '/project/<int:project_id>',
+    resource_class_kwargs={ 'db': db })
+api.add_resource(Section, '/section/<int:section_id>',
+    resource_class_kwargs={ 'db': db })
+api.add_resource(Task, '/task/<int:task_id>',
+    resource_class_kwargs={ 'db': db })
+
 
 ### SCHEDULE Routes ###
 api.add_resource(Item, '/item/<int:item_id>', '/item',

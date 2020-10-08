@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 
-Base = declarative_base()
+UserBase = declarative_base()
 
-class User(Base):
+class User(UserBase):
     __tablename__ = 'users'
     id = sql.Column(sql.Integer, primary_key=True)
     username = sql.Column(sql.String, unique=True)
