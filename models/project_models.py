@@ -10,7 +10,8 @@ class Project(ProjectBase):
     name = sql.Column(sql.String(length=32))
     details = sql.Column(sql.String)
     owner_id = sql.Column(sql.Integer)
-    sections = relationship("Section", back_populates="project")
+    sections = relationship("Section", back_populates="project", cascade="all, delete")
+    collaborators = relationship("Collaborator")
     last_updated = sql.Column(sql.String)
     updated_by = sql.Column(sql.Integer)
     active = sql.Column(sql.Boolean)
@@ -21,7 +22,7 @@ class Section(ProjectBase):
     name = sql.Column(sql.String)
     project_id = sql.Column(sql.Integer, sql.ForeignKey('projects.id'))
     project = relationship("Project", back_populates="sections")
-    tasks = relationship("Task", backref="section")
+    tasks = relationship("Task", backref="section", cascade="all, delete")
     owner_id = sql.Column(sql.Integer)
     last_updated = sql.Column(sql.String)
     updated_by = sql.Column(sql.Integer)
@@ -38,3 +39,9 @@ class Task(ProjectBase):
     updated_by = sql.Column(sql.Integer)
     position = sql.Column(sql.Integer)
     active = sql.Column(sql.Boolean)
+
+class Collaborator(ProjectBase):
+    __tablename__ = 'collaborators'
+    id = sql.Column(sql.Integer, primary_key=True)
+    user_id = sql.Column(sql.Integer)
+    project_id = sql.Column(sql.Integer, sql.ForeignKey('projects.id'))

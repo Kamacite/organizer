@@ -15,7 +15,7 @@ class Projects(Resource):
     def get(self):
         user_id = get_jwt_identity()
         try:
-            result_projects = self.db.session.query(mProject.id, mProject.name, mProject.details).filter(mProject.owner_id == user_id).order_by(mProject.name.asc()).all()
+            result_projects = self.db.session.query(mProject.id, mProject.name, mProject.details, mProject.active).filter(mProject.owner_id == user_id).order_by(mProject.name.asc()).all()
         except:
             abort(404, message="No projects found.")
         user_projects = []
@@ -23,7 +23,8 @@ class Projects(Resource):
             user_projects.append({
                 'id': proj[0],
                 'name': proj[1],
-                'details': proj[2]
+                'details': proj[2],
+                'active': proj[3]
             })    
         return jsonify(user_projects)
 
@@ -79,11 +80,34 @@ class Project(Resource):
 
     @jwt_required
     def patch(self, project_id):
-        pass
+        user_id = get_jwt_identity()
+        error = project_schema.validate(request.json, session=self.db.session)
+        if error:
+            abort(400, message=str(error))
+        try:
+            project = self.db.session.query(mProject).filter(mProject.id == project_id, mProject.owner_id == user_id).one()
+        except:
+            abort(404)
+        project_updates = project_schema.load(request.json)
+        if(project_updates.name != None):
+            project.name = project_updates.name
+        if(project_updates.details != None):
+            project.details = project_updates.details
+        if(project_updates.active != None):
+            project.active = project_updates.active
+        self.db.session.commit()
+        return project_schema.dump(project)
 
     @jwt_required
     def delete(self, project_id):
-        pass
+        user_id = get_jwt_identity()
+        try:
+            project = self.db.session.query(mProject).filter(mProject.id == project_id, mProject.owner_id == user_id).one()
+        except:
+            abort(404, message="Item does not exist")
+        self.db.session.delete(project)
+        self.db.session.commit()
+        return project_schema.dump(project)
 
 class Section(Resource):
     def __init__(self, **kwargs):
@@ -138,17 +162,32 @@ class Section(Resource):
         if(section_updates.position != section.position and section_updates.position != None):
             #reorder sections
             self._order_sections(section, section_updates.position)
-        else:
+        if(section_updates.name != None):
             #Update name
-            pass
+            section.name = section_updates.name
+        if(section_updates.active != None):
+            #Update active
+            section.active = section_updates.active
         section.last_updated = datetime.now().isoformat()
         section.updated_by = user_id
         self.db.session.commit()
         return section_schema.dump(section)
     
     @jwt_required
-    def delete(self):
-        pass
+    def delete(self, section_id):
+        user_id = get_jwt_identity()
+        error = section_schema.validate(request.json, session=self.db.session)
+        if error:
+            abort(400, message=str(error))
+        try:
+            section = self.db.session.query(mSection).filter(mSection.id == section_id, mSection.owner_id == user_id).one()
+        except:
+            abort(404, message="Item does not exist")
+        section_updates = section_schema.load(request.json)
+        self._order_sections(section, section_updates.position)
+        self.db.session.delete(section)
+        self.db.session.commit()
+        return section_schema.dump(section)
 
 class Task(Resource):
     def __init__(self, **kwargs):

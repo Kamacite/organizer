@@ -51,6 +51,17 @@ class Item(Resource):
             self.db.session.commit()
             return item_schema.dump(item)
 
+    @jwt_required
+    def delete(self, item_id):
+        user_id = get_jwt_identity()
+        try:
+            item = self.db.session.query(mItem).filter(mItem.id == item_id, mItem.owner == user_id).one()
+        except:
+            abort(404, message="Item does not exist")
+        self.db.session.delete(item)
+        self.db.session.commit()
+        return item_schema.dump(item)
+
 class Day(Resource):
 
     def __init__(self, **kwargs):

@@ -12,3 +12,4 @@ class User(UserBase):
     password_hash = sql.Column(sql.String)
     roles = sql.Column(sql.String)
     email = sql.Column(sql.String)
+    data = sql.Column(sql.String)
