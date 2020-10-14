@@ -26,6 +26,8 @@ app.config['JWT_COOKIE_SECURE'] = False
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_SECRET_KEY'] = 'change me'
 
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 api = Api(app)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
