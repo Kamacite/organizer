@@ -1,9 +1,7 @@
 import os, sys
 from marshmallow import post_load, fields, validate
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
-
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from models.project_models import Project, Section, Task
+from ..models.project_models import Project, Section, Task
 
 class TaskSchema(SQLAlchemyAutoSchema):
     class Meta:

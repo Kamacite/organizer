@@ -1,28 +1,27 @@
 from flask import jsonify, request
-from flask_restful import Resource
+from flask.views import MethodView
 from flask_jwt_extended import (
     create_access_token,jwt_refresh_token_required, 
     create_refresh_token,set_access_cookies,
     set_refresh_cookies, unset_jwt_cookies, get_jwt_identity
 )
 from passlib.apps import custom_app_context as pwd_context
-from models.user_models import User
+from ..models.user_models import User
+from organizer_api import db
 
-
-class Login(Resource):
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
+class Login(MethodView):
 
     def post(self):
         content = request.json
         username = content['username']
         password = content['password']
         try:
-            user = self.db.session.query(User).filter(User.username == username).one()
+            user = db.session.query(User).filter(User.username == username).one()
         except:
             resp = jsonify({'login': False})
             resp.status_code = 401
             return resp
+
         if user and pwd_context.verify(password, user.password_hash):
             
             access_token = create_access_token(identity=user.id)
@@ -40,7 +39,7 @@ class Login(Resource):
             resp.status_code = 401
             return resp
 
-class Refresh(Resource):
+class Refresh(MethodView):
     @jwt_refresh_token_required
     def post(self):
         user_id = get_jwt_identity()
@@ -51,7 +50,7 @@ class Refresh(Resource):
         return resp
 
 
-class Logout(Resource):
+class Logout(MethodView):
     def post(self):
         resp = jsonify({'logout': True})
         unset_jwt_cookies(resp)

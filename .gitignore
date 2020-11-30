@@ -2,3 +2,6 @@ __pycache__
 ./models/__pycache__
 ./resources/__pycache__
 *.db
+*.pyc
+*.egg
+*.egg-info
