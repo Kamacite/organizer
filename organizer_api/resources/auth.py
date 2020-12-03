@@ -56,3 +56,33 @@ class Logout(MethodView):
         unset_jwt_cookies(resp)
         resp.status_code = 200
         return resp
+
+class Register(MethodView):
+    def post(self):
+        
+        new_user_data = request.json
+        username = new_user_data['username']
+        password = new_user_data['password']
+        #check if username already exists
+        try:
+            user = db.session.query(User).filter(User.username == username).one()
+        except:
+            user = None
+        #If yes return
+        if(user is not None):
+            resp = jsonify({'message': 'Username already in use.'})
+            resp.status_code = 403
+            return resp
+        #else create user, hash password, return 200
+        new_user = User()
+        new_user.username = username
+        new_user.password_hash = pwd_context.hash(password)
+        new_user.roles = 'users;'
+        db.session.add(new_user)
+        try:
+            db.session.commit()
+        except:
+            abort(500)
+        resp = jsonify({'message': 'User successfully registered'})
+        resp.status_code = 200
+        return resp

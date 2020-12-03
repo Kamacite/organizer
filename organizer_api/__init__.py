@@ -24,7 +24,7 @@ def create_app(test_config=None):
         JWT_SECRET_KEY = 'change me',
     )
     
-    CORS(app, origins=["http://127.0.0.1:36949"], supports_credentials=True)
+    CORS(app, origins=["http://127.0.0.1:5000"], supports_credentials=True)
     
     db.init_app(app)
     ma.init_app(app)
@@ -44,10 +44,11 @@ def create_app(test_config=None):
         pass
 
     # import resources and add url rules
-    from .resources.auth import Login, Refresh, Logout
+    from .resources.auth import Login, Refresh, Logout, Register
     app.add_url_rule('/login', view_func=Login.as_view('login'))
     app.add_url_rule('/refresh', view_func=Refresh.as_view('refresh'))
     app.add_url_rule('/logout', view_func=Logout.as_view('logout'))
+    app.add_url_rule('/register', view_func=Register.as_view('register'))
     
     from .resources.schedule import Item, Day, Today, Week
     item_view = Item.as_view('item')
@@ -62,10 +63,5 @@ def create_app(test_config=None):
     app.add_url_rule('/project/<int:project_id>', view_func=Project.as_view('project'))
     app.add_url_rule('/section/<int:section_id>', view_func=Section.as_view('section'))
     app.add_url_rule('/task/<int:task_id>', view_func=Task.as_view('task'))
-    
-
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World'
 
     return app
