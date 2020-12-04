@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import *
 from ..models.schedule_schemas import item_schema
 from ..models.schedule_models import Item as mItem
-from organizer_api import db
+from organizer import db
 
 class Item(MethodView):
     

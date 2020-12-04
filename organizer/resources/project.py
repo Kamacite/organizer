@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import *
 from ..models.project_models import Project as mProject, Section as mSection, Task as mTask
 from ..models.project_schemas import project_schema, section_schema, task_schema
-from organizer_api import db
+from organizer import db
 
 class Projects(MethodView):
   

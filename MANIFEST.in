@@ -1,4 +1,4 @@
-graft organizer_api/utils
+graft organizer/utils
 
 global-exclude *.pyc
 global-exclude *.db

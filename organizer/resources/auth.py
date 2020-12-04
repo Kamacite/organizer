@@ -7,7 +7,7 @@ from flask_jwt_extended import (
 )
 from passlib.apps import custom_app_context as pwd_context
 from ..models.user_models import User
-from organizer_api import db
+from organizer import db
 
 class Login(MethodView):
 
