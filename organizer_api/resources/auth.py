@@ -27,7 +27,7 @@ class Login(MethodView):
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
             
-            resp = jsonify({'login': True})
+            resp = jsonify({'login': True, 'roles': user.roles})
            
             set_access_cookies(resp, access_token)
             set_refresh_cookies(resp, refresh_token)
@@ -77,7 +77,7 @@ class Register(MethodView):
         new_user = User()
         new_user.username = username
         new_user.password_hash = pwd_context.hash(password)
-        new_user.roles = 'users;'
+        new_user.roles = 'user'
         db.session.add(new_user)
         try:
             db.session.commit()

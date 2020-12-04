@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
@@ -24,7 +24,7 @@ def create_app(test_config=None):
         JWT_SECRET_KEY = 'change me',
     )
     
-    CORS(app, origins=["http://127.0.0.1:5000"], supports_credentials=True)
+    CORS(app, supports_credentials=True)
     
     db.init_app(app)
     ma.init_app(app)
@@ -63,5 +63,19 @@ def create_app(test_config=None):
     app.add_url_rule('/project/<int:project_id>', view_func=Project.as_view('project'))
     app.add_url_rule('/section/<int:section_id>', view_func=Section.as_view('section'))
     app.add_url_rule('/task/<int:task_id>', view_func=Task.as_view('task'))
+
+    from .resources.admin import Users
+    admin_user_view = Users.as_view('admin_user_view')
+    app.add_url_rule('/admin/users', view_func=admin_user_view, methods=['GET',])
+    app.add_url_rule('/admin/users/<int:user_id>', view_func=admin_user_view, methods=['PATCH','DELETE'])
+
+    #Serve svelte app
+    @app.route("/")
+    def base():
+        return send_from_directory('client/public', 'index.html')
+
+    @app.route("/<path:path>")
+    def home(path):
+        return send_from_directory('client/public', path)
 
     return app
