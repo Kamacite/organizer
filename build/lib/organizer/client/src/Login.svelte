@@ -51,7 +51,6 @@ async function login() {
         $current_user.roles = data['roles'].split(",");
         if (!$current_user.roles.includes("user")) {
             $view = "admin";
-            setCookie("view", $view, !$remember_user);
         }
         $flash_message = ["success","Login successful"];
 	} else {

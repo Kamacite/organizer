@@ -5,3 +5,8 @@ __pycache__
 *.pyc
 *.egg
 *.egg-info
+./organizer/client/node_modules/
+./organizer/client/public/build/
+./build/
+./dist/
+.DS_Store

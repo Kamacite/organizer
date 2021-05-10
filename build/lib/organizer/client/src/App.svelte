@@ -93,7 +93,6 @@
         }
         catch {}
         try {
-            $current_user = {};
             $current_user.username = getCookie("username");
             $current_user.roles = getCookie("roles").split(",");
             console.log($current_user.roles)
@@ -109,7 +108,7 @@
             $view = getCookie("view");
         }
         catch {}
-        if($current_user === false) {
+        if(!$current_user) {
             logout();
         }
         else {

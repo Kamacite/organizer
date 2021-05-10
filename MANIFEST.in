@@ -1,4 +1,4 @@
 graft organizer/utils
-
+graft organizer/client
 global-exclude *.pyc
 global-exclude *.db
