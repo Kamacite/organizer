@@ -24,7 +24,7 @@ class Users(MethodView):
         return is_admin
 
     #list of all users plus their id and roles
-    @jwt_required
+    @jwt_required()
     def get(self):
         admin_id = get_jwt_identity()
         #check if user has admin role
@@ -45,7 +45,7 @@ class Users(MethodView):
             abort(403)
 
     #update user (new username, new password, and/or new role)
-    @jwt_required
+    @jwt_required()
     def patch(self, user_id):
         #check_admin
         admin_id = get_jwt_identity()
@@ -79,7 +79,7 @@ class Users(MethodView):
         return resp
 
     #delete users and anything related to user
-    @jwt_required
+    @jwt_required()
     def delete(self, user_id):
         #check admin
         admin_id = get_jwt_identity()

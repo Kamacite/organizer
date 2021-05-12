@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask.views import MethodView
 from flask_jwt_extended import (
-    create_access_token,jwt_refresh_token_required, 
+    create_access_token, jwt_required, 
     create_refresh_token,set_access_cookies,
     set_refresh_cookies, unset_jwt_cookies, get_jwt_identity
 )
@@ -40,7 +40,7 @@ class Login(MethodView):
             return resp
 
 class Refresh(MethodView):
-    @jwt_refresh_token_required
+    @jwt_required(refresh=True)
     def post(self):
         user_id = get_jwt_identity()
         access_token = create_access_token(identity=user_id)

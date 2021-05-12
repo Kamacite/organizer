@@ -32,7 +32,7 @@
 </script>
 
 <div id="main-nav" class="container-fluid">
-    <div class="row">
+    <div class="row d-none d-md-flex">
             <h6 class="m-2">Hi, {$current_user.username} |</h6>
             {#if $current_user.roles.includes("user")}
             <button class="btn btn-light view-btn"
@@ -62,9 +62,48 @@
             <a class="m-2" href="/" on:click|preventDefault={logout}>Logout</a>
         </div>
     </div>
+    <div class="row d-md-none">
+        <h6 class="m-2">Hi, {$current_user.username} |</h6>
+        <div class="col p-0 m-0 mt-1" align="right">
+            <a class="m-2" href="/" on:click|preventDefault={logout}>Logout</a>
+        </div>
+    </div>
+    <div class="row d-md-none mobile-tabs">
+        {#if $current_user.roles.includes("user")}
+        <button class="btn btn-light view-btn"
+                style={($view === "split" ? "background-color:white;": "")}
+                on:click={()=>{$view="split";setCookie("view",$view,!$remember_user)}}>
+            Split View
+        </button>
+        <button class="btn btn-light view-btn"
+                style={($view === "project" ? "background-color:white;": "")}
+                on:click={()=>{$view="project";setCookie("view",$view,!$remember_user)}}>
+            Project View
+        </button>
+        <button class="btn btn-light view-btn"
+            style={($view === "schedule" ? "background-color:white;": "")}
+            on:click={()=> {$view="schedule";setCookie("view",$view,!$remember_user)}}>
+            Schedule View
+        </button>
+        {/if}
+        {#if $current_user.roles.includes("admin")}
+        <button class="btn btn-light view-btn"
+            style={($view === "admin" ? "background-color:white;": "")}
+            on:click={()=> {$view="admin";setCookie("view",$view,!$remember_user)}}>
+            Admin View
+        </button>
+        {/if}
+    </div>
 </div>
 
 <style>
+
+    .mobile-tabs {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+    }
 
     .view-btn {
         position: relative;

@@ -9,7 +9,7 @@ from organizer import db
 
 class Projects(MethodView):
   
-    @jwt_required
+    @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
         try:
@@ -26,7 +26,7 @@ class Projects(MethodView):
             })    
         return jsonify(user_projects)
 
-    @jwt_required
+    @jwt_required()
     def post(self):
         user_id = get_jwt_identity()
         error = project_schema.validate(request.json, session=db.session)
@@ -43,7 +43,7 @@ class Projects(MethodView):
 
 class Project(MethodView):
     
-    @jwt_required
+    @jwt_required()
     def get(self, project_id):
         user_id = get_jwt_identity()
         try:
@@ -53,7 +53,7 @@ class Project(MethodView):
         return project_schema.dump(project)
 
     # Add new section to project
-    @jwt_required
+    @jwt_required()
     def post(self, project_id):
         user_id = get_jwt_identity()
         error = section_schema.validate(request.json, session=db.session)
@@ -74,7 +74,7 @@ class Project(MethodView):
         return section_schema.dump(new_section)
         
 
-    @jwt_required
+    @jwt_required()
     def patch(self, project_id):
         user_id = get_jwt_identity()
         error = project_schema.validate(request.json, session=db.session)
@@ -95,7 +95,7 @@ class Project(MethodView):
         db.session.commit()
         return project_schema.dump(project)
 
-    @jwt_required
+    @jwt_required()
     def delete(self, project_id):
         user_id = get_jwt_identity()
         try:
@@ -109,7 +109,7 @@ class Project(MethodView):
 class Section(MethodView):
     
     # Add new task to section
-    @jwt_required
+    @jwt_required()
     def post(self, section_id):
         user_id = get_jwt_identity()
         error = task_schema.validate(request.json, session=db.session)
@@ -143,7 +143,7 @@ class Section(MethodView):
                 s.position = s.position - 1
             section.position = new_position
 
-    @jwt_required
+    @jwt_required()
     def patch(self, section_id):
         user_id = get_jwt_identity()
         error = section_schema.validate(request.json, session=db.session)
@@ -168,7 +168,7 @@ class Section(MethodView):
         db.session.commit()
         return section_schema.dump(section)
     
-    @jwt_required
+    @jwt_required()
     def delete(self, section_id):
         user_id = get_jwt_identity()
         error = section_schema.validate(request.json, session=db.session)
@@ -218,7 +218,7 @@ class Task(MethodView):
             task.position = new_position
 
     # Update task details
-    @jwt_required
+    @jwt_required()
     def patch(self, task_id):
         user_id = get_jwt_identity()
         error = task_schema.validate(request.json, session=db.session)
@@ -240,6 +240,6 @@ class Task(MethodView):
         db.session.commit()
         return task_schema.dump(task)
 
-    @jwt_required
+    @jwt_required()
     def delete(self):
         pass

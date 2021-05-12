@@ -9,7 +9,7 @@ from organizer import db
 
 class Item(MethodView):
     
-    @jwt_required
+    @jwt_required()
     def get(self, item_id=0):
         user_id = get_jwt_identity()
         try:
@@ -21,7 +21,7 @@ class Item(MethodView):
            
         else:
             abort(404)
-    @jwt_required
+    @jwt_required()
     def put(self, item_id=0):
         user_id = get_jwt_identity()
         if item_id == 0:
@@ -48,7 +48,7 @@ class Item(MethodView):
             db.session.commit()
             return item_schema.dump(item)
 
-    @jwt_required
+    @jwt_required()
     def delete(self, item_id):
         user_id = get_jwt_identity()
         try:
@@ -61,7 +61,7 @@ class Item(MethodView):
 
 class Day(MethodView):
 
-    @jwt_required
+    @jwt_required()
     def get(self, get_date):
         user_id = get_jwt_identity()
         cur_date = date.fromisoformat(get_date)
@@ -77,7 +77,7 @@ class Day(MethodView):
 
 class Today(MethodView):
 
-    @jwt_required
+    @jwt_required()
     def get(self):
         user_id = get_jwt_identity()
         cur_date = date.today()
@@ -93,7 +93,7 @@ class Today(MethodView):
 
 class Week(MethodView):
 
-    @jwt_required
+    @jwt_required()
     def get(self, get_date=None):
         user_id = get_jwt_identity()
         if get_date is None:
