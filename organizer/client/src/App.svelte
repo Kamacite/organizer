@@ -96,7 +96,6 @@
             $current_user = {};
             $current_user.username = getCookie("username");
             $current_user.roles = getCookie("roles").split(",");
-            console.log($current_user.roles)
         }
         catch {
             $current_user = false;

@@ -13,16 +13,15 @@
         if($editing) {
             $new_edit = true;
         }
-        if(!$inputing) {
-            $edit_data = {
-            'id':id,
-            'date':date,
-            'time': time,
-            'title': title,
-            'details': details
-            };
-            $editing = true;
-        }     
+        $inputing = false
+        $edit_data = {
+        'id':id,
+        'date':date,
+        'time': time,
+        'title': title,
+        'details': details
+        };
+        $editing = true;     
     };
 
 </script>
