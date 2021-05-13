@@ -114,7 +114,7 @@ async function selectProject(project) {
         </button>
     </div>
     
-    <div class="row m-0">
+    <div class="row m-0 project-list">
         {#each $project_list as proj }
             {#if proj.active}
             <div class="col project mr-2 mt-2" on:click={()=>selectProject(proj)}>
@@ -165,6 +165,11 @@ async function selectProject(project) {
         
     }
 
+    @media screen and (max-width: 576px) {
+        .project-list {
+            justify-content: center;
+        }
+    }
 
     .project:hover {
         background-color: steelblue;

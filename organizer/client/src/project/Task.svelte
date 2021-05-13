@@ -1,5 +1,6 @@
 <script>
-import { onMount } from "svelte";
+import { onMount, tick } from "svelte";
+import { text } from "svelte/internal";
 
 
 import { api_host, csrf_tok, flash_message, request, view } from "../app_store";
@@ -14,7 +15,7 @@ let backup_details = "";
 let hidden = false;
 let new_date;
 let new_time;
-$: readonly = !start_edit;
+$: editable = start_edit;
 $: scheduling= false;
 let textarea;
 
@@ -24,14 +25,22 @@ onMount(()=>{
     }
 });
 
-function edit() {
-    readonly = false
-    backup_details = task.details;
+async function edit() {
+    editable = true;
+    backup_details = textarea.textContent;
+    await tick();
+    textarea.focus();
+    var range = document.createRange();
+    range.selectNodeContents(textarea)
+    range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
 
 function cancel() {
-    readonly = true;
-    task.details = backup_details;
+    editable = false;
+    textarea.textContent = backup_details;
     if (start_edit) {
         //hidden = true;
         cancelNewTask(task.id);
@@ -42,7 +51,7 @@ function cancel() {
 async function save() {
     if (task.id <= -1) {
         let new_task = {
-            details: task.details,
+            details: textarea.textContent,
             position: task.position
         };
         const res = await $request($api_host + "/section/" + task.section_id  , {
@@ -58,7 +67,7 @@ async function save() {
             let task_info = await res.json();
             task.id = task_info.id
             task.start_edit = false;
-            readonly = true;
+            editable = false;
             $flash_message = ["success",""]
         }
         else {
@@ -67,7 +76,7 @@ async function save() {
     }
     else {
         let task_updates = {
-            details: task.details,
+            details: textarea.textContent,
             active: true
         };
         const res = await $request($api_host + "/task/" + task.id  , {
@@ -80,7 +89,7 @@ async function save() {
             body: JSON.stringify(task_updates)
         });
         if(res.status === 200) {
-            readonly = true;
+            editable = false;
             $flash_message = ["success",""]
         }
         else {
@@ -127,12 +136,27 @@ async function scheduleTask() {
         throw new Error(res.message)
     }
 }
+function prevent_default_enter(event) {
+    if(event.key === "Enter") {
+        event.preventDefault();
+        var selection = window.getSelection()
+        var range = selection.getRangeAt(0)
+        var br = new Text("\n")
+        range.deleteContents();
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.setEndAfter(br);
+        range.collapse(false)
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+}
 
 </script>
 
 {#if !hidden} 
 <div class="task d-block p-0">
-    <textarea class="d-block w-100" readonly={readonly} placeholder="Enter task details..." bind:value={task.details} bind:this={textarea}></textarea>
+    <div class="d-block w-100 contenteditable" contenteditable={editable}  bind:this={textarea} on:keypress={prevent_default_enter}>{task.details ? task.details : ""}</div>
     {#if scheduling}
         <div class="row m-1">
             <div class="col p-0" align="center">
@@ -144,7 +168,7 @@ async function scheduleTask() {
         </div>
     {/if}
     <div class="row m-0">
-        {#if readonly && !scheduling}
+        {#if !editable && !scheduling}
         <button class="col tl-button p-0" align="center"  on:click={edit}>Edit</button>
         <button class="col tr-button p-0" align="center"  on:click={()=>scheduling=true}>Schedule</button>
         {:else if scheduling}
@@ -159,6 +183,14 @@ async function scheduleTask() {
 </div>
 {/if}
 <style>
+
+    .contenteditable {
+        white-space: pre-wrap;
+        display: inline-block;
+        padding: 3px;
+        min-height: 3.4em;
+    }
+
     .task {
         color: black;
         background-color: snow;

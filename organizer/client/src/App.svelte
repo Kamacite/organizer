@@ -140,6 +140,7 @@
     
     <Nav/>
     <br>
+    <br class="d-md-none">
     <Flash/>
     {#if $view === "split"}
     <br>
