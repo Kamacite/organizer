@@ -22,6 +22,10 @@ let textarea;
 onMount(()=>{
     if(start_edit) {
         textarea.focus();
+        var sel = window.getSelection();
+        var range = sel.getRangeAt(0);
+        range.selectNodeContents(textarea);
+        range.collapse(true);
     }
 });
 
@@ -30,12 +34,10 @@ async function edit() {
     backup_details = textarea.textContent;
     await tick();
     textarea.focus();
-    var range = document.createRange();
-    range.selectNodeContents(textarea)
-    range.collapse(false);
     var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    var range = sel.getRangeAt(0);
+    range.selectNodeContents(textarea);
+    range.collapse(false);
 }
 
 function cancel() {
@@ -49,6 +51,7 @@ function cancel() {
 
 //This will also post task updates/create new ones
 async function save() {
+    console.log(textarea.textContent.split("\n"))
     if (task.id <= -1) {
         let new_task = {
             details: textarea.textContent,
@@ -139,16 +142,28 @@ async function scheduleTask() {
 function prevent_default_enter(event) {
     if(event.key === "Enter") {
         event.preventDefault();
-        var selection = window.getSelection()
-        var range = selection.getRangeAt(0)
-        var br = new Text("\n")
+        var selection = window.getSelection();
+        var range = selection.getRangeAt(0);
+        var testRange = document.createRange();
+        testRange.selectNodeContents(textarea);
+        console.log(textarea.firstChild)
+        console.log(range)
+        console.log(testRange)
+        if(range.compareBoundaryPoints(Range.END_TO_START, testRange) == 0) {
+            var nl = new Text("\n\n");
+            console.log("At the end")
+        }
+        else {
+            var nl = new Text("\n");
+        }
         range.deleteContents();
-        range.insertNode(br);
-        range.setStartAfter(br);
-        range.setEndAfter(br);
+        range.insertNode(nl);
+        range.setStartAfter(nl);
+        range.setEndAfter(nl);
         range.collapse(false)
         selection.removeAllRanges();
         selection.addRange(range);
+        textarea.normalize()
     }
 }
 

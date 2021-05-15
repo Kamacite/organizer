@@ -44,9 +44,9 @@
             $editing=false;
             //Trigger check to see if either day or week need to be reloaded
             submit_day_check.set(null)
-            submit_day_check.set(new_date)
+            submit_day_check.set($day_date)
             submit_week_check.set(null)
-            submit_week_check.set(new_date)
+            submit_week_check.set($week_date)
         } else {
             $flash_message = ["failure","Failed to update item."]
         }

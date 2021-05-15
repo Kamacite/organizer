@@ -138,7 +138,7 @@ async function deleteProject() {
 </script>
 
 <div class="conatiner-fluid">
-    <h3 class="ml-4">Project Settings:</h3>
+    <h4 class="ml-2">Project Settings:</h4>
     <div class="row m-0" >
         <div class="col">
             <div class="d-block d-md-flex justify-content-end">
@@ -147,7 +147,7 @@ async function deleteProject() {
                     <div class="w-100 d-block d-md-none"></div>
                     <input id="name" class="setting_input" bind:value={new_name}>
                     <div class="w-100 d-block d-md-none"></div>
-                    <button class="btn btn-outline-secondary" on:click={updateName}>Update</button>
+                    <button class="btn btn-outline-secondary ml-1" on:click={updateName}>Update</button>
                     <button class="btn btn-outline-secondary ml-1" on:click={()=>new_name=backup_name}>Cancel</button>
                 </div>
             </div>
@@ -158,15 +158,16 @@ async function deleteProject() {
                     <div class="w-100 d-block d-md-none"></div>
                     <textarea id="description" class="setting_input" bind:value={new_details}></textarea>
                     <div class="w-100 d-block d-md-none"></div>
-                    <button class="btn btn-outline-secondary" on:click={updateDetails}>Update</button>
+                    <button class="btn btn-outline-secondary ml-1" on:click={updateDetails}>Update</button>
                     <button class="btn btn-outline-secondary ml-1" on:click={()=>new_details=backup_details}>Cancel</button>
                 </div>
             </span>
             <br>
             
         </div>
+        <div class="w-100 d-block d-md-none"></div>
         <div class="col">
-            <span class="row mr-2 justify-content-center">
+            <span class="row mr-2 justify-content-end">
                 <div class="d-flex align-items-start">
                     {#if $active_project.active}
                     <button class="btn btn-danger" on:click={archiveProject}>Archive</button>

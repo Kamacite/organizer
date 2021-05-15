@@ -1,15 +1,15 @@
 <script>
 
-import { onMount } from 'svelte';
+import { onMount, tick } from 'svelte';
 import { api_host, csrf_tok, request, view } from '../app_store';
 import { active_project, project_list } from './project_store.js'
 
-$: expand = false;
+$: expanded = false;
 $: show_form = false;
 
 let new_name = "";
 let new_details = "";
-
+let div;
 let show_archived = false;
 
 //onMount get projects and populate projects list
@@ -18,11 +18,9 @@ onMount(()=> {
 })
 
 $: if (!$active_project && $view === "project") {
-    expand = true;
+    expanded = true;
 }
-else {
-    expand = false;
-}
+
 
 async function getProjects() {
     const res = await $request($api_host + "/projects", {
@@ -77,10 +75,19 @@ async function newProject() {
         new_name="";
         new_details="";
         show_form = false;
-        $project_list = $project_list;
-        
+        $project_list = $project_list;   
+    }    
+}
+
+async function expand() {
+    expanded=!expanded;
+    if(expanded && $view != 'project') {
+        scrollSelect();
     }
-    
+}
+async function scrollSelect(options={behavior:'smooth', block:'start'}) {
+    await tick();
+    div.scrollIntoView(options);
 }
 
 async function selectProject(project) {
@@ -96,21 +103,26 @@ async function selectProject(project) {
         $active_project = await res.json();
         $active_project.sections = $active_project.sections.sort((a,b)=> a.position - b.position);
         $active_project.selector = project;
-        expand = false;
+        $active_project.scroll = true;
+        scrollSelect({behavior:'smooth', block:'start'});
+        expanded = false;
     }
 }
 
 </script>
 
-<div class="container-fluid projects p-1">
-    <button class="btn-sm btn-light w-100" on:click={()=>expand=!expand}>Projects</button>
-    {#if expand}
+<div class="container-fluid projects p-1" bind:this={div}>
+    <button id="show-projects-btn" class="btn-sm btn-light w-100" on:click={expand}>Projects</button>
+    {#if expanded}
     <div class="row m-0 mt-1">
         <h2>My Projects |</h2>
         <button class="btn-sm btn-light m-1" 
+                title={ show_archived ? "Hide Archives" : "Show Archives"}
                 style={ show_archived ? "background-color:dimgrey;color:white;": ""} 
-                on:click={()=>show_archived=!show_archived}>
-            {!show_archived ? 'View' : 'Hide'} Archived
+                on:click={()=>{show_archived=!show_archived;scrollSelect({behavior:'smooth', block:'end'})}}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive d-flex" viewBox="0 0 16 16">
+                <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+                </svg>
         </button>
     </div>
     
@@ -142,7 +154,7 @@ async function selectProject(project) {
             {/if}
         </div>
     </div>
-    <div class="row m-0">
+    <div class="row m-0 project-list">
         {#if show_archived}
         {#each $project_list as proj }
             {#if !proj.active}
@@ -159,10 +171,20 @@ async function selectProject(project) {
 
 
 <style>
+    
+    #show-projects-btn {
+        border-radius: 1em 1em 1em 1em;
+    }
+    #show-projects-btn:focus {
+        outline-width: 0px;
+        box-shadow: 0px 0px 1px 1px black;
+    }
+
     .projects{
         color: white;
         background-color: slategrey;
-        
+        border-radius: 1em 1em 1em 1em;
+        scroll-margin-top: 4em;
     }
 
     @media screen and (max-width: 576px) {
@@ -172,7 +194,7 @@ async function selectProject(project) {
     }
 
     .project:hover {
-        background-color: steelblue;
+        background-color: rgb(15, 32, 32);
     }
 
     .project{
@@ -185,6 +207,7 @@ async function selectProject(project) {
         max-width: 15em;
         min-height: 10.5em;
         max-height: 10.5em;
+        border-radius: 1em 1em 1em 1em;
     }
     .archived-project{
         cursor: pointer;
@@ -196,8 +219,9 @@ async function selectProject(project) {
         max-width: 15em;
         min-height: 10.5em;
         max-height: 10.5em;
+        border-radius: 1em 1em 1em 1em;
     }
     .archived-project:hover {
-        background-color: crimson;
+        background-color: rgb(87, 0, 0);
     }
 </style>

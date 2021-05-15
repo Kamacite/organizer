@@ -195,7 +195,7 @@
         {/if}
         {#if editing}
             <div class="col m-0 p-0">
-                <input type="text" class="form-control-sm ml-1"bind:value={new_name}>
+                <input type="text" size="20" class="form-control-sm ml-1"bind:value={new_name}>
                 <button type="button" class="btn-sm btn-light mt-1" on:click={renameSection}>Rename</button>
                 <button type="button" class="btn-sm btn-light mr-1" on:click={()=>editing=false}>Cancel</button>
                 <div>

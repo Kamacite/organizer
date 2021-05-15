@@ -4,6 +4,9 @@
     import { projectCleanUp } from './project/project_utils.js';
     import { scheduleCleanUp } from './schedule/schedule_utils.js';
 
+    $: if($view) {
+        window.scrollTo(0,0)
+    }
 
     async function logout() {
     	const res = await fetch($api_host +"/logout", {
@@ -132,6 +135,7 @@
         left: 0;
         color:white;
         margin: 0;
+        margin-bottom: 2em;
         background-color: rgb(33, 27, 66); 
     }
 
