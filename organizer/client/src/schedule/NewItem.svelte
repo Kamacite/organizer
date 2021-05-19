@@ -2,7 +2,7 @@
 
 import { flash_message, api_host, csrf_tok, request } from '../app_store.js'
 import { day_date, inputing, submit_day_check, submit_week_check } from './schedule_store.js';
-
+import Editor from '../editor/Editor.svelte';
 
 let d = new Date();
 //title, date, time, and details cannot be empty
@@ -11,14 +11,14 @@ let new_date;
 // the form date defaults to current selected day in day component
 $: new_date = $day_date;
 let new_time = "";
-let new_details = "";
+let editor;
 
 async function handleSubmit() {
     let data = {
         "title":new_title,
         "item_date":new_date,
         "item_time":new_time,
-        "details":new_details,
+        "details":editor.getSanitizedContent(),
         "active":true,
         "reoccuring": false
     };
@@ -34,7 +34,7 @@ async function handleSubmit() {
 	if (res.ok) {
         $flash_message = ["success","New item, " + new_title + ", was entered successfully."]
         new_title="";
-        new_details="";
+        editor.clearContent();
         //Trigger check to see if either day or week need to be reloaded
         submit_day_check.set(null)
         submit_day_check.set(new_date)
@@ -56,7 +56,7 @@ async function handleSubmit() {
             <input class="form-control" id="item_date" type="date" bind:value={new_date}>
             <input class="form-control" id="item_time" type="time" bind:value={new_time}>
             <label for="item_details">Details:</label>
-            <textarea class="form-control" id="item_details" bind:value={new_details}></textarea>
+            <Editor bind:this={editor} initialContent={""} editable={true} autoFocus={false}/>
             <button type="submit">Submit</button>
             <button type="reset">Reset</button>
             <button on:click={()=>$inputing=false}>Cancel</button>

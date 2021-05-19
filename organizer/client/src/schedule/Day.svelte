@@ -42,6 +42,7 @@
     // Checks if a newly submitted item falls in the current shown day.
     // Reloads content if true
     $: if($submit_day_check && loaded) {
+        
         if ($submit_day_check === $day_date) {
             backup_date = $day_date;
             getDaysAgenda();
@@ -73,8 +74,8 @@
             }
         });
 		if (res.ok) {
-            
             items_today = await res.json();
+            console.log(items_today)
             d = new Date($day_date);
 		} else {
 			throw new Error(res.status)

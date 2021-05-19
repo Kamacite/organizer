@@ -137,7 +137,34 @@
 <div class="container-fluid project p-0 justify-content-center" bind:this={main_div}>
     <div class="row m-1">
         <h2>{$active_project.name} |</h2>
-        <div class="col p-0 pl-1" align="left">
+        <div class="new-section m-1">
+            {#if !show_form}
+            <button class="btn-sm btn-outline-secondary m-1" hidden={show_settings} on:click={()=>show_form=!show_form}>Add Section</button>
+            {:else}
+            <form class="form-row p-1" on:submit|preventDefault={newSection}>
+                <div class="col-auto">
+                    <input class="form-control-sm" id="project-title" type="text" bind:value={new_name} placeholder="Section name...">
+                </div>
+                <div class="col-auto">
+                    <button class="btn-sm btn-outline-primary" type="submit">
+                        <!-- Plus icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg d-flex" viewBox="0 0 16 16">
+                            <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <button class="btn-sm btn-outline-secondary" on:click={()=>show_form=!show_form}>
+                        <!-- X icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg d-flex" viewBox="0 0 16 16">
+                            <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
+                        </svg>
+                    </button>  
+                </div>
+            </form>
+            {/if}
+        </div>
+        <div class="p-0 pl-1" align="left">
             <button type="button" class="btn-sm btn-outline-secondary mt-2"
                     title={show_archived ? "Hide Archives": "Show Archives"}
                     hidden={show_settings}
@@ -167,33 +194,8 @@
                 </svg>
             </button>
         </div>
-        <span class="new-section m-1">
-            {#if !show_form}
-            <button class="btn-sm btn-outline-secondary m-1" hidden={show_settings} on:click={()=>show_form=!show_form}>Add Section</button>
-            {:else}
-            <form class="form-row p-1" on:submit|preventDefault={newSection}>
-                <div class="col-auto">
-                    <input class="form-control-sm" id="project-title" type="text" bind:value={new_name} placeholder="Section name...">
-                </div>
-                <div class="col-auto">
-                    <button class="btn-sm btn-outline-primary" type="submit">
-                        <!-- Plus icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg d-flex" viewBox="0 0 16 16">
-                            <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col-auto">
-                    <button class="btn-sm btn-outline-secondary" on:click={()=>show_form=!show_form}>
-                        <!-- X icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg d-flex" viewBox="0 0 16 16">
-                            <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
-                        </svg>
-                    </button>  
-                </div>
-            </form>
-            {/if}
-        </span>
+        
+    
     </div>
     {#if show_settings}
     <ProjectSettings/>

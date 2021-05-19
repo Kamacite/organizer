@@ -1,12 +1,11 @@
 <script>
 import { onMount, tick } from "svelte";
-import { text } from "svelte/internal";
-
 
 import { api_host, csrf_tok, flash_message, request, view } from "../app_store";
 import { submit_day_check, submit_week_check } from "../schedule/schedule_store";
 import { active_project } from "./project_store";
-
+import { sanitize } from "../utils";
+import Editor from "../editor/Editor.svelte";
 
 export let task = {};
 export let start_edit = false;
@@ -17,44 +16,32 @@ let new_date;
 let new_time;
 $: editable = start_edit;
 $: scheduling= false;
-let textarea;
+let editor;
 
 onMount(()=>{
-    if(start_edit) {
-        textarea.focus();
-        var sel = window.getSelection();
-        var range = sel.getRangeAt(0);
-        range.selectNodeContents(textarea);
-        range.collapse(true);
-    }
+   
 });
 
 async function edit() {
     editable = true;
-    backup_details = textarea.textContent;
-    await tick();
-    textarea.focus();
-    var sel = window.getSelection();
-    var range = sel.getRangeAt(0);
-    range.selectNodeContents(textarea);
-    range.collapse(false);
+    editor.startEdit();
 }
 
 function cancel() {
     editable = false;
-    textarea.textContent = backup_details;
+    editor.cancelEdit();
     if (start_edit) {
         //hidden = true;
         cancelNewTask(task.id);
     }
+    
 }
 
 //This will also post task updates/create new ones
 async function save() {
-    console.log(textarea.textContent.split("\n"))
     if (task.id <= -1) {
         let new_task = {
-            details: textarea.textContent,
+            details: editor.getSanitizedContent(),
             position: task.position
         };
         const res = await $request($api_host + "/section/" + task.section_id  , {
@@ -68,9 +55,11 @@ async function save() {
         });
         if(res.status === 200) {
             let task_info = await res.json();
-            task.id = task_info.id
+            task.id = task_info.id;
+            task.details = new_task.details;
             task.start_edit = false;
             editable = false;
+            editor.stopEdit();
             $flash_message = ["success",""]
         }
         else {
@@ -79,7 +68,7 @@ async function save() {
     }
     else {
         let task_updates = {
-            details: textarea.textContent,
+            details: editor.getSanitizedContent(),
             active: true
         };
         const res = await $request($api_host + "/task/" + task.id  , {
@@ -92,22 +81,24 @@ async function save() {
             body: JSON.stringify(task_updates)
         });
         if(res.status === 200) {
+            task.details = task_updates.details;
             editable = false;
+            editor.stopEdit()
             $flash_message = ["success",""]
         }
         else {
             $flash_message = ["failure",""]
         }
     }
-    
 }
+
 
 async function scheduleTask() {
     let schedule_item = {
         title: $active_project.name,
         item_date:new_date,
         item_time:new_time,
-        details: task.details,
+        details: editor.getSanitizedContent(),
         active:true,
         reoccuring: false
     }
@@ -139,39 +130,11 @@ async function scheduleTask() {
         throw new Error(res.message)
     }
 }
-function prevent_default_enter(event) {
-    if(event.key === "Enter") {
-        event.preventDefault();
-        var selection = window.getSelection();
-        var range = selection.getRangeAt(0);
-        var testRange = document.createRange();
-        testRange.selectNodeContents(textarea);
-        console.log(textarea.firstChild)
-        console.log(range)
-        console.log(testRange)
-        if(range.compareBoundaryPoints(Range.END_TO_START, testRange) == 0) {
-            var nl = new Text("\n\n");
-            console.log("At the end")
-        }
-        else {
-            var nl = new Text("\n");
-        }
-        range.deleteContents();
-        range.insertNode(nl);
-        range.setStartAfter(nl);
-        range.setEndAfter(nl);
-        range.collapse(false)
-        selection.removeAllRanges();
-        selection.addRange(range);
-        textarea.normalize()
-    }
-}
-
 </script>
 
 {#if !hidden} 
 <div class="task d-block p-0">
-    <div class="d-block w-100 contenteditable" contenteditable={editable}  bind:this={textarea} on:keypress={prevent_default_enter}>{task.details ? task.details : ""}</div>
+    <Editor bind:this={editor} editable={editable} initialContent={task.details ? task.details : ""}/>
     {#if scheduling}
         <div class="row m-1">
             <div class="col p-0" align="center">

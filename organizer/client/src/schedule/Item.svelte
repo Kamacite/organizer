@@ -1,5 +1,8 @@
 <script>
     import { inputing, editing, new_edit, edit_data } from './schedule_store.js';
+    import { sanitize } from '../utils';
+    
+    import { onMount } from 'svelte';
 
     export let mode = ""; //day,week,month...
     export let id = 0;
@@ -7,6 +10,8 @@
     export let time = "";
     export let title = "";
     export let details = "";
+
+    let detailsSpan;
 
     function editClick() {
         window.scrollTo(0,document.body.scrollTop);
@@ -19,11 +24,17 @@
         'date':date,
         'time': time,
         'title': title,
-        'details': details
+        'details': sanitize(details)
         };
         $editing = true;     
     };
-
+/*
+    onMount(()=>{
+        if(details) {
+            detailsSpan.innerHTML = sanitize(details)
+        }
+    })
+*/
 </script>
 {#if mode == "day"}
 <div>
@@ -34,10 +45,8 @@
         </svg>
     </a>
     {time} | {title}
-    {#if details} 
-        <span>-</span> 
-    {/if}
-    {details} 
+    
+    <div class="pl-4"bind:this={detailsSpan}>{@html sanitize(details)}</div>
 </div>
 {/if}
 <style>
