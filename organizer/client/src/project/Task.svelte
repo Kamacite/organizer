@@ -4,13 +4,11 @@ import { onMount, tick } from "svelte";
 import { api_host, csrf_tok, flash_message, request, view } from "../app_store";
 import { submit_day_check, submit_week_check } from "../schedule/schedule_store";
 import { active_project } from "./project_store";
-import { sanitize } from "../utils";
 import Editor from "../editor/Editor.svelte";
 
 export let task = {};
 export let start_edit = false;
 export let cancelNewTask;
-let backup_details = "";
 let hidden = false;
 let new_date;
 let new_time;
@@ -161,14 +159,6 @@ async function scheduleTask() {
 </div>
 {/if}
 <style>
-
-    .contenteditable {
-        white-space: pre-wrap;
-        display: inline-block;
-        padding: 3px;
-        min-height: 3.4em;
-    }
-
     .task {
         color: black;
         background-color: snow;

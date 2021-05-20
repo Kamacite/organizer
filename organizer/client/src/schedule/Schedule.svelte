@@ -2,7 +2,7 @@
 
 	import { onMount } from 'svelte';
 	
-	import Day from './Day.svelte';
+	import DayAgenda from './DayAgenda.svelte';
 	import Week from './Week.svelte';
 	import NewItem from './NewItem.svelte';
 	import EditItem from './EditItem.svelte';
@@ -131,7 +131,7 @@
 {/if}
 <div style="display:{day_display}">
 	<br>
-	<Day/>
+	<DayAgenda/>
 </div>
 <div style="display:{week_display}">
 	<br>
