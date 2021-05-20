@@ -10,8 +10,8 @@
     let late_items = [];
     
     let d = new Date()
-    const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    let today=DAYS_OF_WEEK[d.getDay()+1];
+    const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    let today=DAYS_OF_WEEK[d.getDay()];
     // day_date, store that controls what the current date is shown for the day
     // defaults to today
     day_date.set(d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) 
@@ -77,7 +77,7 @@
 		if (res.ok) {
             items_today = await res.json();
             d = new Date($day_date);
-            today=DAYS_OF_WEEK[d.getDay()+1];
+            today=DAYS_OF_WEEK[d.getDay()];
 		} else {
 			throw new Error(res.status)
 		}
