@@ -5,18 +5,18 @@
     import Editor from '../editor/Editor.svelte';
     //title, date, time, and details cannot be empty
     let id = $edit_data['id'];
-    let new_title = $edit_data['title'];
-    let new_date = $edit_data['date'];
-    let new_time = $edit_data['time'];
+    let newTitle = $edit_data['title'];
+    let newDate = $edit_data['date'];
+    let newTime = $edit_data['time'];
     let newDetails = $edit_data['details'];
     let editor;
 
 
     $: if ($new_edit) {
         id = $edit_data['id'];
-        new_title = $edit_data['title'];
-        new_date = $edit_data['date'];
-        new_time = $edit_data['time'];
+        newTitle = $edit_data['title'];
+        newDate = $edit_data['date'];
+        newTime = $edit_data['time'];
         new_details = $edit_data['details'];
         $new_edit = false;
     }
@@ -24,9 +24,9 @@
     async function handleSubmit() {
         
         let data = {
-            "title":new_title,
-            "item_date":new_date,
-            "item_time":new_time,
+            "title":newTitle,
+            "item_date":newDate,
+            "item_time":newTime,
             "details":editor.getSanitizedContent(),
             "active":true,
             "reoccuring": false
@@ -42,7 +42,7 @@
             body: JSON.stringify(data)
         });
         if (res.ok) {
-            $flash_message = ["success",new_title + " was updated successfully."]
+            $flash_message = ["success",newTitle + " was updated successfully."]
             $editing=false;
             //Trigger check to see if either day or week need to be reloaded
             submit_day_check.set(null)
@@ -66,7 +66,7 @@
             }
         });
         if (res.ok) {
-            $flash_message = ["success",new_title + " agenda item was deleted successfully."]
+            $flash_message = ["success",newTitle + " agenda item was deleted successfully."]
             $editing=false;
             //Trigger check to see if either day or week need to be reloaded
             submit_day_check.set(null);
@@ -85,9 +85,9 @@
         <form on:submit|preventDefault={handleSubmit}>
             <div class="form-group">
                 <label for="edit_title">Title:</label>
-                <input class="form-control" id="edit_title" type="text" bind:value={new_title}>
-                <input class="form-control" id="edit_item_date" type="date" bind:value={new_date}>
-                <input class="form-control" id="edit_item_time" type="time" bind:value={new_time}>
+                <input class="form-control" id="edit_title" type="text" bind:value={newTitle}>
+                <input class="form-control" id="edit_item_date" type="date" bind:value={newDate}>
+                <input class="form-control" id="edit_item_time" type="time" bind:value={newTime}>
                 <label for="edit_item_details">Details:</label>
                 <Editor bind:this={editor} initialContent={newDetails} editable={true} autoFocus={false}/>
                 <button type="submit" class="btn btn-outline-secondary mt-1">Update</button>

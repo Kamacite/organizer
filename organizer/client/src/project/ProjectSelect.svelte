@@ -5,12 +5,12 @@ import { api_host, csrf_tok, request, view } from '../app_store';
 import { active_project, project_list } from './project_store.js'
 
 $: expanded = false;
-$: show_form = false;
+$: showForm = false;
 
-let new_name = "";
-let new_details = "";
+let newProjectName = "";
+let newProjectDetails = "";
 let div;
-let show_archived = false;
+let showArchived = false;
 
 //onMount get projects and populate projects list
 onMount(()=> {
@@ -50,8 +50,8 @@ $: if($project_list != []) {
 
 async function newProject() {
     let new_proj = {
-        name: new_name,
-        details: new_details
+        name: newProjectName,
+        details: newProjectDetails
     }
     let req_object = {
             credentials: "include",
@@ -72,9 +72,9 @@ async function newProject() {
             details: res_data.details,
             active: true
         });
-        new_name="";
-        new_details="";
-        show_form = false;
+        newProjectName="";
+        newProjectDetails="";
+        showForm = false;
         $project_list = $project_list;   
     }    
 }
@@ -117,9 +117,9 @@ async function selectProject(project) {
     <div class="row m-0 mt-1">
         <h2>My Projects |</h2>
         <button class="btn-sm btn-light m-1" 
-                title={ show_archived ? "Hide Archives" : "Show Archives"}
-                style={ show_archived ? "background-color:dimgrey;color:white;": ""} 
-                on:click={()=>{show_archived=!show_archived;scrollSelect({behavior:'smooth', block:'end'})}}>
+                title={ showArchived ? "Hide Archives" : "Show Archives"}
+                style={ showArchived ? "background-color:dimgrey;color:white;": ""} 
+                on:click={()=>{showArchived=!showArchived;scrollSelect({behavior:'smooth', block:'end'})}}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive d-flex" viewBox="0 0 16 16">
                 <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
                 </svg>
@@ -136,8 +136,8 @@ async function selectProject(project) {
             {/if}
         {/each}
         <div class="col project mr-2 mt-2">
-            {#if !show_form}
-                <div on:click={()=>show_form=true}>
+            {#if !showForm}
+                <div on:click={()=>showForm=true}>
                     <svg width="10.5em" height="10.5em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                     </svg>
@@ -145,17 +145,17 @@ async function selectProject(project) {
             {:else}
             <form class="" on:submit|preventDefault={newProject}>
                 <div class="form-group">
-                    <input class="form-control mt-1" id="project-title" type="text" bind:value={new_name} placeholder="Project name...">
-                    <textarea class="form-control mt-1 mb-1" id="project-details" bind:value={new_details} placeholder="Project details..."></textarea>
+                    <input class="form-control mt-1" id="project-title" type="text" bind:value={newProjectName} placeholder="Project name...">
+                    <textarea class="form-control mt-1 mb-1" id="project-details" bind:value={newProjectDetails} placeholder="Project details..."></textarea>
                     <button class="btn btn-light" type="submit">Create</button>
-                    <button class="btn btn-light" on:click={()=>show_form=false}>Cancel</button>  
+                    <button class="btn btn-light" on:click={()=>showForm=false}>Cancel</button>  
                 </div>
             </form>
             {/if}
         </div>
     </div>
     <div class="row m-0 project-list">
-        {#if show_archived}
+        {#if showArchived}
         {#each $project_list as proj }
             {#if !proj.active}
             <div class="col archived-project mr-2 mt-2" on:click={()=>selectProject(proj)}>

@@ -5,9 +5,9 @@
     import Item from './Item.svelte';
     
     // List containing all agenda items for given day_date
-    let items_today = [];
+    let itemsToday = [];
     // Used to correcttly order items later than midnight
-    let late_items = [];
+    let lateItems = [];
     
     let d = new Date()
     const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -75,7 +75,7 @@
             }
         });
 		if (res.ok) {
-            items_today = await res.json();
+            itemsToday = await res.json();
             d = new Date($day_date);
             today=DAYS_OF_WEEK[d.getDay()];
 		} else {
@@ -100,32 +100,32 @@
                     + "-" + ("0" + (d.getDate())).slice(-2);
     }
 
-    // when items_today changes fill in new items to divs
+    // when itemsToday changes fill in new items to divs
     
-    $: if(!(items_today === [])) {
+    $: if(!(itemsToday === [])) {
         
-        for(let item in items_today) {
-            if (items_today[item].item_time < "12:00" && items_today[item].item_time >= "05:00") {
-                morning_items.push(items_today[item]);         
+        for(let item in itemsToday) {
+            if (itemsToday[item].item_time < "12:00" && itemsToday[item].item_time >= "05:00") {
+                morning_items.push(itemsToday[item]);         
             }
-            else if (items_today[item].item_time < "18:00" && items_today[item].item_time >= "05:00") {
-                afternoon_items.push(items_today[item]);    
+            else if (itemsToday[item].item_time < "18:00" && itemsToday[item].item_time >= "05:00") {
+                afternoon_items.push(itemsToday[item]);    
             }
             else {
                 // Check if an evening item is past midnight
-                if(items_today[item].item_time[0] === "0") {
+                if(itemsToday[item].item_time[0] === "0") {
                     // add it to second array, allowing them to be listed later.
-                    late_items.push(items_today[item])
+                    lateItems.push(itemsToday[item])
                     continue;
                 }
-                evening_items.push(items_today[item])    
+                evening_items.push(itemsToday[item])    
             }
         };
         // List all late night/early am (12am-5am)
-        for(let item in late_items) {
-            evening_items.push(items_today[item])
+        for(let item in lateItems) {
+            evening_items.push(itemsToday[item])
         }
-        late_items = [];
+        lateItems = [];
         
         morning_items = morning_items;
         afternoon_items = afternoon_items;

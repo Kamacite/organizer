@@ -5,11 +5,11 @@ import {day_date} from './schedule_store';
 export let date = new Date();
 let items = [];
 let groupedItems = [];
-let string_date;
+let stringDate;
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 $: if(date) {
-    string_date = date.getFullYear() + "-" + ("0" + (date.getMonth()+1)).slice(-2) + "-" + ("0" + (date.getDate())).slice(-2);
+    stringDate = date.getFullYear() + "-" + ("0" + (date.getMonth()+1)).slice(-2) + "-" + ("0" + (date.getDate())).slice(-2);
 }
 export function setItems(newItems) {
     items = newItems;
@@ -50,7 +50,7 @@ function goToDay(day) {
 </script>
 
 <div>
-    <h5>{DAYS_OF_WEEK[date.getDay()]}</h5><h5>{string_date.slice(5)}-{string_date.slice(0,4)}</h5>
+    <h5>{DAYS_OF_WEEK[date.getDay()]}</h5><h5>{stringDate.slice(5)}-{stringDate.slice(0,4)}</h5>
     {#each groupedItems as item}
         <div>{item.title}{item.count > 1 ? " ("+item.count+")": ""}</div>
     {/each}

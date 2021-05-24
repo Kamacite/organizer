@@ -5,18 +5,18 @@ import { active_project, project_list } from "./project_store";
 
 
 
-let new_name = "";
-let new_details = "";
-let backup_name = "";
-let backup_details = "";
-backup_name = $active_project.name;
-backup_details = $active_project.details;
-new_name = $active_project.name;
-new_details = $active_project.details;
+let newProjectName = "";
+let newProjectDetails = "";
+let backupName = "";
+let backupDetails = "";
+backupName = $active_project.name;
+backupDetails = $active_project.details;
+newProjectName = $active_project.name;
+newProjectDetails = $active_project.details;
 
 async function updateName() {
     let data = {
-        name: new_name
+        name: newProjectName
     };
     const res = await $request($api_host + "/project/" + $active_project.id, {
             method: 'PATCH',
@@ -28,9 +28,9 @@ async function updateName() {
             body: JSON.stringify(data)
     });
     if (res.status === 200) {
-        $active_project.name = new_name;
-        backup_name = new_name;
-        $active_project.selector.name = new_name
+        $active_project.name = newProjectName;
+        backupName = newProjectName;
+        $active_project.selector.name = newProjectName
         $project_list = $project_list
         $flash_message = ["success", "Project name was updated successfully."]
     }   
@@ -41,7 +41,7 @@ async function updateName() {
 
 async function updateDetails() {
     let data = {
-        details: new_details
+        details: newProjectDetails
     };
     const res = await $request($api_host + "/project/" + $active_project.id, {
             method: 'PATCH',
@@ -53,9 +53,9 @@ async function updateDetails() {
             body: JSON.stringify(data)
     });
     if (res.status === 200) {
-        $active_project.details = new_details;
-        backup_details = new_details;
-        $active_project.selector.details = new_details
+        $active_project.details = newProjectDetails;
+        backupDetails = newProjectDetails;
+        $active_project.selector.details = newProjectDetails
         $project_list = $project_list
         $flash_message = ["success", "Project details were updated successfully."]
     }   
@@ -145,10 +145,10 @@ async function deleteProject() {
                 <div class="d-block d-md-flex align-items-start">
                     <label for="name">Project Name:</label>
                     <div class="w-100 d-block d-md-none"></div>
-                    <input id="name" class="setting_input" bind:value={new_name}>
+                    <input id="name" class="setting_input" bind:value={newProjectName}>
                     <div class="w-100 d-block d-md-none"></div>
                     <button class="btn btn-outline-secondary ml-1" on:click={updateName}>Update</button>
-                    <button class="btn btn-outline-secondary ml-1" on:click={()=>new_name=backup_name}>Cancel</button>
+                    <button class="btn btn-outline-secondary ml-1" on:click={()=>newProjectName=backupName}>Cancel</button>
                 </div>
             </div>
             <br>
@@ -156,10 +156,10 @@ async function deleteProject() {
                 <div class="d-block d-md-flex align-items-start">
                     <label for="description">Project Description:</label>
                     <div class="w-100 d-block d-md-none"></div>
-                    <textarea id="description" class="setting_input" bind:value={new_details}></textarea>
+                    <textarea id="description" class="setting_input" bind:value={newProjectDetails}></textarea>
                     <div class="w-100 d-block d-md-none"></div>
                     <button class="btn btn-outline-secondary ml-1" on:click={updateDetails}>Update</button>
-                    <button class="btn btn-outline-secondary ml-1" on:click={()=>new_details=backup_details}>Cancel</button>
+                    <button class="btn btn-outline-secondary ml-1" on:click={()=>newProjectDetails=backupDetails}>Cancel</button>
                 </div>
             </span>
             <br>

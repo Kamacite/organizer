@@ -6,18 +6,18 @@ import Editor from '../editor/Editor.svelte';
 
 let d = new Date();
 //title, date, time, and details cannot be empty
-let new_title = "";
-let new_date;
+let newTitle = "";
+let newDate;
 // the form date defaults to current selected day in day component
-$: new_date = $day_date;
-let new_time = "";
+$: newDate = $day_date;
+let newTime = "";
 let editor;
 
 async function handleSubmit() {
     let data = {
-        "title":new_title,
-        "item_date":new_date,
-        "item_time":new_time,
+        "title":newTitle,
+        "item_date":newDate,
+        "item_time":newTime,
         "details":editor.getSanitizedContent(),
         "active":true,
         "reoccuring": false
@@ -32,14 +32,14 @@ async function handleSubmit() {
         body: JSON.stringify(data)
     });
 	if (res.ok) {
-        $flash_message = ["success","New item, " + new_title + ", was entered successfully."]
-        new_title="";
+        $flash_message = ["success","New item, " + newTitle + ", was entered successfully."]
+        newTitle="";
         editor.clearContent();
         //Trigger check to see if either day or week need to be reloaded
         submit_day_check.set(null)
-        submit_day_check.set(new_date)
+        submit_day_check.set(newDate)
         submit_week_check.set(null)
-        submit_week_check.set(new_date)
+        submit_week_check.set(newDate)
 	} else {
         $flash_message = ["failure","Failed to enter new item."]
     }
@@ -52,9 +52,9 @@ async function handleSubmit() {
     <form on:submit|preventDefault={handleSubmit}>
         <div class="form-group">
             <label for="title">Title:</label>
-            <input class="form-control" id="title" type="text" bind:value={new_title}>
-            <input class="form-control" id="item_date" type="date" bind:value={new_date}>
-            <input class="form-control" id="item_time" type="time" bind:value={new_time}>
+            <input class="form-control" id="title" type="text" bind:value={newTitle}>
+            <input class="form-control" id="item_date" type="date" bind:value={newDate}>
+            <input class="form-control" id="item_time" type="time" bind:value={newTime}>
             <label for="item_details">Details:</label>
             <Editor bind:this={editor} initialContent={""} editable={true} autoFocus={false}/>
             <button type="submit">Submit</button>

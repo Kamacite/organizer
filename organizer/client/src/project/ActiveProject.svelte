@@ -8,44 +8,49 @@
     import ProjectSettings from './ProjectSettings.svelte';
     import { afterUpdate, tick } from 'svelte';
 
-    let new_name = "";
-    let show_form = false;
-    let show_archived = false;
-    let show_settings = false;
-    let all_sections_archived = true;
+    // For adding new sections
+    let newSectionName = "";
+    let showForm = false;
+    
+    let showArchived = false;
+    let showSettings = false;
+    let allSectionsArchived = true;
+    // Used for svelte dnd
     const flipDurationMs = 300;
     let dragging;
     $: dragDisabled = !dragging;
+
     let id = -1;
-    let section_container;
-    let scroll_element = false;
-    let main_div;
+    let sectionContainer;
+    let scrollElement = false;
+    let mainDiv;
 
     $: if($active_project.id != id) {
-        show_archived = false;
-        show_settings = false;
+        showArchived = false;
+        showSettings = false;
         id = $active_project.id
     }
 
+    // Check if all sections are archived
     $: if($active_project) {
         for(let i = 0; i < $active_project.sections.length; i++) {
             if($active_project.sections[i].active) {
-                all_sections_archived = false;
+                allSectionsArchived = false;
                 break;
             }
         }
     }
 
     afterUpdate(()=>{
-        if (scroll_element) {
-            section_container.scrollTo(section_container.scrollHeight, 0);
-            scroll_element = false;
+        if (scrollElement) {
+            sectionContainer.scrollTo(sectionContainer.scrollHeight, 0);
+            scrollElement = false;
         }
     });
 
     async function newSection() {
         let new_section = {
-            name: new_name,
+            name: newSectionName,
             position: $active_project.sections.length ? $active_project.sections.length : 0
         };
         const res = await $request($api_host + "/project/" + $active_project.id, {
@@ -58,10 +63,10 @@
             body: JSON.stringify(new_section)
         });
         if(res.status === 200) {
-            scroll_element = true;
+            scrollElement = true;
             $active_project.sections.push(await res.json());
             $active_project.sections = $active_project.sections.sort((a,b)=> a.position - b.position);
-            new_name = "";
+            newSectionName = "";
             $flash_message = ["success", "New section successfully added."];
         }
         else {
@@ -69,6 +74,7 @@
         }
     }
 
+    // Called after moving a section
     async function patchSectionPosition(section_id,section_updates) {
         const res = await $request($api_host + "/section/" + section_id  , {
                 credentials: "include",
@@ -89,15 +95,17 @@
 
     function closeProject() {
         $active_project = false;
-        show_archived = false;
-        show_settings = false;
-        show_form = false;
+        showArchived = false;
+        showSettings = false;
+        showForm = false;
     }
 
+    // Used for svelte dnd
     function handleConsider(e) {
         $active_project.sections = e.detail.items
     }
 
+    // Used for svelte dnd
     function handleFinal(e) {
         $active_project.sections = e.detail.items
         dragging = false;
@@ -113,19 +121,21 @@
         }
     }
 
+    // Used for svelte dnd
     const startDrag = (e) => {
         e.preventDefault();
         dragging = true;
     };
 
+    // Used for svelte dnd
     const stopDrag = () => {
         dragging = false;
     }
 
     async function toggleSettings() {
-       show_settings = !show_settings;
-       //Called on closing (note toggled show_settings first so page updates before scrolling.)
-       if (!show_settings) {
+       showSettings = !showSettings;
+       //Called on closing (note toggled showSettings first so page updates before scrolling.)
+       if (!showSettings) {
             await tick();
             window.scrollTo(0,document.body.scrollHeight);
        }
@@ -134,16 +144,16 @@
 </script>
 
 {#if $active_project}
-<div class="container-fluid project p-0 justify-content-center" bind:this={main_div}>
+<div class="container-fluid project p-0 justify-content-center" bind:this={mainDiv}>
     <div class="row m-1">
         <h2>{$active_project.name} |</h2>
         <div class="new-section m-1">
-            {#if !show_form}
-            <button class="btn-sm btn-outline-secondary m-1" hidden={show_settings} on:click={()=>show_form=!show_form}>Add Section</button>
+            {#if !showForm}
+            <button class="btn-sm btn-outline-secondary m-1" hidden={showSettings} on:click={()=>showForm=!showForm}>Add Section</button>
             {:else}
             <form class="form-row p-1" on:submit|preventDefault={newSection}>
                 <div class="col-auto">
-                    <input class="form-control-sm" id="project-title" type="text" bind:value={new_name} placeholder="Section name...">
+                    <input class="form-control-sm" id="project-title" type="text" bind:value={newSectionName} placeholder="Section name...">
                 </div>
                 <div class="col-auto">
                     <button class="btn-sm btn-outline-primary" type="submit">
@@ -154,7 +164,7 @@
                     </button>
                 </div>
                 <div class="col-auto">
-                    <button class="btn-sm btn-outline-secondary" on:click={()=>show_form=!show_form}>
+                    <button class="btn-sm btn-outline-secondary" on:click={()=>showForm=!showForm}>
                         <!-- X icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg d-flex" viewBox="0 0 16 16">
                             <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
@@ -166,18 +176,18 @@
         </div>
         <div class="p-0 pl-1" align="left">
             <button type="button" class="btn-sm btn-outline-secondary mt-2"
-                    title={show_archived ? "Hide Archives": "Show Archives"}
-                    hidden={show_settings}
-                    style={ show_archived ? "background-color:dimgrey;color:white;": ""} 
-                    on:click={()=>show_archived=!show_archived}>
+                    title={showArchived ? "Hide Archives": "Show Archives"}
+                    hidden={showSettings}
+                    style={ showArchived ? "background-color:dimgrey;color:white;": ""} 
+                    on:click={()=>showArchived=!showArchived}>
                     <!-- Archive Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive d-flex" viewBox="0 0 16 16">
                     <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
                     </svg>
             </button>
             <button type="button" class="btn-sm btn-outline-secondary mt-2"
-                    title={show_settings? "Close Settings": "Show Settings"} 
-                    style={ show_settings ? "background-color:dimgrey;color:white;": ""} 
+                    title={showSettings? "Close Settings": "Show Settings"} 
+                    style={ showSettings ? "background-color:dimgrey;color:white;": ""} 
                     on:click={toggleSettings}>
                     <!-- Gear Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear d-flex" viewBox="0 0 16 16">
@@ -186,8 +196,8 @@
                     </svg>
             </button>
             <button type="button" class="btn-sm btn-outline-danger mt-2"
-                    title={show_settings ? "Close Settings" : "Close Project"}
-                    on:click={()=>{show_settings? toggleSettings() : closeProject()}}>
+                    title={showSettings ? "Close Settings" : "Close Project"}
+                    on:click={()=>{showSettings? toggleSettings() : closeProject()}}>
                 <!-- X Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg text-danger d-flex" viewBox="0 0 16 16">
                     <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
@@ -197,21 +207,21 @@
         
     
     </div>
-    {#if show_settings}
+    {#if showSettings}
     <ProjectSettings/>
     {:else}
-    {#if $active_project.sections.length > 0 && (!all_sections_archived || show_archived)}
+    {#if $active_project.sections.length > 0 && (!allSectionsArchived || showArchived)}
     <div class="row sections m-auto" 
         use:dndzone={{items:$active_project.sections, dragDisabled, flipDurationMs, type:'section'}} 
         on:consider={handleConsider} 
         on:finalize={handleFinal}
-        bind:this={section_container}>
+        bind:this={sectionContainer}>
         {#each $active_project.sections as sect(sect.id)}
         <div class="section m-0" animate:flip="{{duration: flipDurationMs}}">
-            {#if sect.active || show_archived}
+            {#if sect.active || showArchived}
             <div class="m-1">
                 <div class="grip" on:mousedown={startDrag} on:touchstart={startDrag} on:mouseup={stopDrag} on:touchend={stopDrag}></div>
-                <Section bind:section={sect} name={sect.name} sect_id={sect.id} items={sect.tasks.sort( (a,b) => a.position - b.position )}/>
+                <Section bind:section={sect} name={sect.name} sectionID={sect.id} items={sect.tasks.sort( (a,b) => a.position - b.position )}/>
             </div>
                 
             {/if}

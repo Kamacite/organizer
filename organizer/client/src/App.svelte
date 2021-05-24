@@ -13,8 +13,9 @@
     import Admin from './admin/Admin.svelte';
 
     
-    let csrf_refresh;
+    let csrfRefresh;
 
+    //Wrap fetch to catch 401 responses and attempt a refresh before logging out
     async function smartRequest(url, req_object) {
         const res = await fetch(url, req_object);
         if(res.status === 200) {
@@ -65,17 +66,17 @@
 
     async function refresh() {
         try {
-                csrf_refresh = getCookie("csrf_refresh_token");
+                csrfRefresh = getCookie("csrf_refresh_token");
             }
         catch {
-            console.log("Failed to set csrf_refresh");
+            console.log("Failed to set csrfRefresh");
         }  
         const res = await fetch($api_host + '/refresh', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf_refresh
+                    'X-CSRF-TOKEN': csrfRefresh
                 }
         });
         if(res.status === 200) {

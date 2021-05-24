@@ -5,7 +5,7 @@ import { setCookie, getCookie } from './cookie.js';
 let username = "";
 let password = "";
 let confirmPassword = "";
-let register_flag = false;
+let registerFlag = false;
 
 async function login() {
     if(username === "") {
@@ -88,7 +88,7 @@ async function register() {
         body: JSON.stringify(data)
     });
 	if (res.ok) {
-        register_flag = false;
+        registerFlag = false;
         $flash_message = ["success","Registration successful"];
 	} else {
         $flash_message = ["failure","Failed to register."];
@@ -107,7 +107,7 @@ async function register() {
             <input class="form-control" id="username" type="text" bind:value={username}>
             <label for="password">Password:</label>
             <input class="form-control" id="password" type="password" bind:value={password}>
-            {#if register_flag}
+            {#if registerFlag}
             <label for="confirmPassword">Confirm Password:</label>
             <input class="form-control" id="confirmPassword" type="password" bind:value={confirmPassword}>
             <br>
@@ -118,18 +118,18 @@ async function register() {
                 <label class="form-check-label" for="remember">Remember me?</label>
             </div>
             {/if}
-            {#if !register_flag}
+            {#if !registerFlag}
             <button class="btn-outline-secondary" type="submit" on:click={()=>login()}>Login</button>
             {:else}
             <button class="btn-outline-secondary" on:click={()=>register()}>Register</button>
             {/if}
-            <button class="btn-outline-secondary" on:click={()=>{username="";password="";confirmPassword="";register_flag=false}}>Cancel</button>
+            <button class="btn-outline-secondary" on:click={()=>{username="";password="";confirmPassword="";registerFlag=false}}>Cancel</button>
             <br><br>
             <div>
-            {#if !register_flag}
-                <a href="/" on:click|preventDefault={()=>register_flag=true}>Register</a>
+            {#if !registerFlag}
+                <a href="/" on:click|preventDefault={()=>registerFlag=true}>Register</a>
             {:else}
-                <a href="/" on:click|preventDefault={()=>register_flag=false}>Login</a>
+                <a href="/" on:click|preventDefault={()=>registerFlag=false}>Login</a>
             {/if}
             </div>  
         </div>

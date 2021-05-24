@@ -2,8 +2,6 @@
     import { inputing, editing, new_edit, edit_data } from './schedule_store.js';
     import { sanitize } from '../utils';
     
-    import { onMount } from 'svelte';
-
     export let mode = ""; //day,week,month...
     export let id = 0;
     export let date = "";
@@ -28,13 +26,7 @@
         };
         $editing = true;     
     };
-/*
-    onMount(()=>{
-        if(details) {
-            detailsSpan.innerHTML = sanitize(details)
-        }
-    })
-*/
+
 </script>
 {#if mode == "day"}
 <div>

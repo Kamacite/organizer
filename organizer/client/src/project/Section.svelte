@@ -8,14 +8,14 @@
 
     export let section;
     export let name = "";
-    export let sect_id = "";
+    export let sectionID = "";
     export let items = [];
-    let new_task_id = -1;
+    let newTaskID = -1;
     let editing = false;
-    let new_name = name;
-    let section_element;
-    let scroll_section = false;
-    let scroll_window = false;
+    let newSectionName = name;
+    let sectionElement;
+    let scrollSection = false;
+    let scrollWindow = false;
     let unlockDelete = false;
 
     const flipDurationMs = 300;
@@ -24,30 +24,30 @@
 
 
     afterUpdate(()=>{
-        if (scroll_window) {
+        if (scrollWindow) {
             window.scrollTo(0,document.body.scrollHeight);
-            scroll_window = false;
+            scrollWindow = false;
         }
-        if (scroll_section) {
-            section_element.scrollTo(0, section_element.scrollHeight);
-            scroll_section = false;
+        if (scrollSection) {
+            sectionElement.scrollTo(0, sectionElement.scrollHeight);
+            scrollSection = false;
         }
     });
 
-    function add_task() {
-        scroll_window = true;
-        scroll_section = true;
-        items.push({ id:new_task_id, start_edit:true, details: "", section_id: sect_id, position: items.length });
+    function addTask() {
+        scrollWindow = true;
+        scrollSection = true;
+        items.push({ id:newTaskID, start_edit:true, details: "", section_id: sectionID, position: items.length });
         items = items;
-        new_task_id--;
+        newTaskID--;
     }
 
     async function renameSection() {
         let section_updates = {
-            name: new_name,
+            name: newSectionName,
             active: true
         };
-        const res = await $request($api_host + "/section/" + sect_id  , {
+        const res = await $request($api_host + "/section/" + sectionID  , {
                 credentials: "include",
                 method: 'PATCH',
                 headers: {
@@ -57,7 +57,7 @@
                 body: JSON.stringify(section_updates)
             });
             if(res.status === 200) {          
-                name=new_name;
+                name=newSectionName;
                 editing = false;
                 $flash_message = ["success", "Renamed section."]
             }
@@ -71,7 +71,7 @@
            // position: position,
             active: active
         };
-        const res = await $request($api_host + "/section/" + sect_id  , {
+        const res = await $request($api_host + "/section/" + sectionID  , {
                 credentials: "include",
                 method: 'PATCH',
                 headers: {
@@ -109,7 +109,7 @@
         let data = {
             position: $active_project.sections.length - 1
         }
-        const res = await $request($api_host + "/section/" + sect_id  , {
+        const res = await $request($api_host + "/section/" + sectionID  , {
                 credentials: "include",
                 method: 'DELETE',
                 headers: {
@@ -119,7 +119,7 @@
                 body: JSON.stringify(data)
             });
             if(res.status === 200) {
-                let index = $active_project.sections.findIndex(i=>i.id === sect_id);
+                let index = $active_project.sections.findIndex(i=>i.id === sectionID);
                 $active_project.sections.splice(index, 1)
                 for(let i = 0; i < $active_project.sections.length; i ++) {
                     $active_project.sections[i].position = i;
@@ -138,22 +138,24 @@
         items = items;
     }
 
+    // Used for svelte dnd
     function handleConsider(e) {
         items = e.detail.items
     }
+    // Used for svelte dnd
     async function handleFinal(e) {
         items = e.detail.items;
         dragging = false;
         let dragged_id = e.detail.info.id;
         let item_index = items.findIndex(i=>i.id === dragged_id)
         if( item_index != -1) {
-            if (items[item_index].section_id === sect_id && items[item_index].position === item_index) {
+            if (items[item_index].section_id === sectionID && items[item_index].position === item_index) {
                 // Task has not moved so don't patch
                 return;
             }
-            items[item_index].section_id = sect_id;
+            items[item_index].section_id = sectionID;
             let task_updates = {
-                section_id: sect_id,
+                section_id: sectionID,
                 position: item_index,
                 active: true,
             };
@@ -166,11 +168,13 @@
         section.tasks = items;
     }
 
+    // Used for svelte dnd
     const startDrag = (e) => {
         e.preventDefault();
         dragging = true;
     };
 
+    // Used for svelte dnd
     const stopDrag = () => {
         dragging = false;
     }
@@ -190,12 +194,12 @@
 
             </h4>
             <div class="col" align="right">
-                <button type="button" class="btn-sm btn-light m-1" on:click={add_task}>New Item</button>
+                <button type="button" class="btn-sm btn-light m-1" on:click={addTask}>New Item</button>
             </div>
         {/if}
         {#if editing}
             <div class="col m-0 p-0">
-                <input type="text" size="20" class="form-control-sm ml-1"bind:value={new_name}>
+                <input type="text" size="20" class="form-control-sm ml-1"bind:value={newSectionName}>
                 <button type="button" class="btn-sm btn-light mt-1" on:click={renameSection}>Rename</button>
                 <button type="button" class="btn-sm btn-light mr-1" on:click={()=>editing=false}>Cancel</button>
                 <div>
@@ -214,11 +218,11 @@
         use:dndzone={{items, dragDisabled, flipDurationMs}} 
         on:consider={handleConsider} 
         on:finalize={handleFinal}
-        bind:this={section_element}>
+        bind:this={sectionElement}>
         {#each items as task(task.id)}
         <div animate:flip="{{duration: flipDurationMs}}">
             <div class="grip mt-1" on:mousedown={startDrag} on:touchstart={startDrag} on:mouseup={stopDrag} on:touchend={stopDrag}></div>
-            <Task task={task} start_edit={task.start_edit} cancelNewTask={cancelNewTask}/>
+            <Task task={task} startEdit={task.start_edit} cancelNewTask={cancelNewTask}/>
         </div>
         {/each}
         

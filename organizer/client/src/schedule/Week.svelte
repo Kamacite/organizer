@@ -4,9 +4,9 @@
     import { day_date, week_date, submit_week_check} from './schedule_store.js'
     import Day from './Day.svelte';
     // List containing every agenda item for the week
-    let items_week = [];
+    let itemsForWeek = [];
     // Used to correcttly order items later than midnight
-    let late_items = [];
+    let lateItems = [];
     let d = new Date();
     // week_date, store that controls what the current date the week starts at
     // defaults to today
@@ -14,12 +14,12 @@
                     + "-" + ("0" + (d.getDate())).slice(-2));
          
     // List containing the current dates for the 7 week divs
-    let week_dates = [];
-    let week_dates_strings = [];
+    let weekDates = [];
+    let weekDatesStrings = [];
     // List containing the current day of the week for the 7 divs (int index into days_of_week)
-    let week_days = [];
+    let weekDays = [];
     
-    let week_items = [[],[],[],[],[],[],[]];
+    let itemsByDay = [[],[],[],[],[],[],[]];
     // Ensures everything if fully loaded before change to $week_date store have any effect
     let loaded = false;
     // Bind variables for the 7 Day components
@@ -41,7 +41,7 @@
     //Used with chevron buttons to advance the day in the date select
     function changeDay(change) {
         if(!$week_date) {
-            $week_date = week_dates[0]
+            $week_date = weekDates[0]
         }
         d = addDays($week_date , change);
         $week_date = d.getFullYear() + "-" + ("0" + (d.getMonth()+1)).slice(-2) 
@@ -62,7 +62,7 @@
     // Reloads content if true
     $: if($submit_week_check && loaded) {
         for(let i=0;i<7;i++) {
-            if ($submit_week_check === week_dates_strings[i]) {
+            if ($submit_week_check === weekDatesStrings[i]) {
                 $submit_week_check = null
                 getWeekAgenda();
             }
@@ -75,15 +75,15 @@
     function updateDates() {
         for( let i = 0; i<7; i++) {
                 let day = addDays($week_date, i);
-                week_dates[i] = day;
-                week_dates_strings[i] = day.getFullYear() + "-" + ("0" + (day.getMonth()+1)).slice(-2) + "-" + ("0" + (day.getDate())).slice(-2);
-                week_days[i] = day.getDay();
+                weekDates[i] = day;
+                weekDatesStrings[i] = day.getFullYear() + "-" + ("0" + (day.getMonth()+1)).slice(-2) + "-" + ("0" + (day.getDate())).slice(-2);
+                weekDays[i] = day.getDay();
         }
     }
     
     // called from getWeekAgenda
     function clearWeekAgenda() {
-        week_items = [[],[],[],[],[],[],[]];
+        itemsByDay = [[],[],[],[],[],[],[]];
     }
 
     // Fetch week agenda from api
@@ -96,7 +96,7 @@
             }
         });
 		if (res.ok) {
-            items_week = await res.json();
+            itemsForWeek = await res.json();
             updateDates();
             updateDayItems();
 		} else {
@@ -105,55 +105,55 @@
     }
 
     function updateDayItems(){
-        if(!(items_week === [])) {
-        for(let item in items_week) {
-            // Check for late night early morning items and add to late_items
-            if (items_week[item].item_time >= "00:00" && items_week[item].item_time < "05:00") {
-                late_items.push(items_week[item]);
+        if(!(itemsForWeek === [])) {
+        for(let item in itemsForWeek) {
+            // Check for late night early morning items and add to lateItems
+            if (itemsForWeek[item].item_time >= "00:00" && itemsForWeek[item].item_time < "05:00") {
+                lateItems.push(itemsForWeek[item]);
                 continue;
             }
-            if (items_week[item].item_date === week_dates_strings[0]) {
-                week_items[0].push(items_week[item].title);               
-            } else if (items_week[item].item_date === week_dates_strings[1]) {
-                week_items[1].push(items_week[item].title);              
-            } else if (items_week[item].item_date === week_dates_strings[2]) {
-                week_items[2].push(items_week[item].title);             
-            } else if (items_week[item].item_date === week_dates_strings[3]) {
-                week_items[3].push(items_week[item].title);              
-            } else if (items_week[item].item_date === week_dates_strings[4]) {
-                week_items[4].push(items_week[item].title);               
-            } else if (items_week[item].item_date === week_dates_strings[5]) {
-                week_items[5].push(items_week[item].title);                
-            } else if (items_week[item].item_date === week_dates_strings[6]) {
-                week_items[6].push(items_week[item].title);               
+            if (itemsForWeek[item].item_date === weekDatesStrings[0]) {
+                itemsByDay[0].push(itemsForWeek[item].title);               
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[1]) {
+                itemsByDay[1].push(itemsForWeek[item].title);              
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[2]) {
+                itemsByDay[2].push(itemsForWeek[item].title);             
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[3]) {
+                itemsByDay[3].push(itemsForWeek[item].title);              
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[4]) {
+                itemsByDay[4].push(itemsForWeek[item].title);               
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[5]) {
+                itemsByDay[5].push(itemsForWeek[item].title);                
+            } else if (itemsForWeek[item].item_date === weekDatesStrings[6]) {
+                itemsByDay[6].push(itemsForWeek[item].title);               
             }
         }
         //add late items after all others
-        for(let item in late_items) {
-            if (late_items[item].item_date === week_dates_strings[0]) {
-                week_items[0].push(late_items[item].title);                 
-            } else if (late_items[item].item_date === week_dates_strings[1]) {
-                week_items[1].push(late_items[item].title);             
-            } else if (late_items[item].item_date === week_dates_strings[2]) {
-                week_items[2].push(late_items[item].title);           
-            } else if (late_items[item].item_date === week_dates_strings[3]) {
-                week_items[3].push(late_items[item].title);           
-            } else if (late_items[item].item_date === week_dates_strings[4]) {
-                week_items[4].push(late_items[item].title);            
-            } else if (late_items[item].item_date === week_dates_strings[5]) {
-                week_items[5].push(late_items[item].title);              
-            } else if (late_items[item].item_date === week_dates_strings[6]) {
-                week_items[6].push(late_items[item].title);               
+        for(let item in lateItems) {
+            if (lateItems[item].item_date === weekDatesStrings[0]) {
+                itemsByDay[0].push(lateItems[item].title);                 
+            } else if (lateItems[item].item_date === weekDatesStrings[1]) {
+                itemsByDay[1].push(lateItems[item].title);             
+            } else if (lateItems[item].item_date === weekDatesStrings[2]) {
+                itemsByDay[2].push(lateItems[item].title);           
+            } else if (lateItems[item].item_date === weekDatesStrings[3]) {
+                itemsByDay[3].push(lateItems[item].title);           
+            } else if (lateItems[item].item_date === weekDatesStrings[4]) {
+                itemsByDay[4].push(lateItems[item].title);            
+            } else if (lateItems[item].item_date === weekDatesStrings[5]) {
+                itemsByDay[5].push(lateItems[item].title);              
+            } else if (lateItems[item].item_date === weekDatesStrings[6]) {
+                itemsByDay[6].push(lateItems[item].title);               
             }
         }
-        late_items = []
-        day0.setItems(week_items[0]);
-        day1.setItems(week_items[1]);
-        day2.setItems(week_items[2]);
-        day3.setItems(week_items[3]);
-        day4.setItems(week_items[4]);
-        day5.setItems(week_items[5]);
-        day6.setItems(week_items[6]);
+        lateItems = []
+        day0.setItems(itemsByDay[0]);
+        day1.setItems(itemsByDay[1]);
+        day2.setItems(itemsByDay[2]);
+        day3.setItems(itemsByDay[3]);
+        day4.setItems(itemsByDay[4]);
+        day5.setItems(itemsByDay[5]);
+        day6.setItems(itemsByDay[6]);
     }
     }
     function goToDay(day) {
@@ -179,32 +179,32 @@
 <!-- Divs for each day of the week -->
 <div class="container-fluid">
     <div id="week" class="row">
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[0])}>
-            <Day bind:this={day0} date={week_dates[0]}/>
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[0])}>
+            <Day bind:this={day0} date={weekDates[0]}/>
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[1])}>
-            <Day bind:this={day1} date={week_dates[1]}/>     
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[1])}>
+            <Day bind:this={day1} date={weekDates[1]}/>     
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[2])}>
-            <Day bind:this={day2} date={week_dates[2]}/>
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[2])}>
+            <Day bind:this={day2} date={weekDates[2]}/>
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[3])}>
-            <Day bind:this={day3} date={week_dates[3]}/>
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[3])}>
+            <Day bind:this={day3} date={weekDates[3]}/>
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[4])}>
-            <Day bind:this={day4} date={week_dates[4]}/>
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[4])}>
+            <Day bind:this={day4} date={weekDates[4]}/>
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" bon:click={() => goToDay(week_dates_strings[5])}>
-            <Day bind:this={day5} date={week_dates[5]}/>
+        <div class="day col mx-1 pt-2" bon:click={() => goToDay(weekDatesStrings[5])}>
+            <Day bind:this={day5} date={weekDates[5]}/>
         </div>
         <div class="seperator w-100 d-block d-md-none"></div>
-        <div class="day col mx-1 pt-2" on:click={() => goToDay(week_dates_strings[6])}>
-            <Day bind:this={day6} date={week_dates[6]}/>
+        <div class="day col mx-1 pt-2" on:click={() => goToDay(weekDatesStrings[6])}>
+            <Day bind:this={day6} date={weekDates[6]}/>
         </div>
     </div>
 

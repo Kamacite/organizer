@@ -10,22 +10,22 @@
 	import { editing, inputing, day_date, week_date,  } from './schedule_store.js';
 	
 	let time = new Date();
-	const days_of_week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 	$: hours = ("0" + time.getHours()).slice(-2);
 	$: minutes = ("0" + time.getMinutes()).slice(-2);
 	$: seconds = ("0" + time.getSeconds()).slice(-2);
 	$: date = (time.getMonth()+1) + "/" + (time.getDate()) + "/" + time.getFullYear();
-	$: day = days_of_week[time.getDay()]
+	$: day = DAYS_OF_WEEK[time.getDay()]
 
-	let item_button_style = "";
-	let item_button_text = "New Item"
+	let itemButtonStyle = "";
+	let itemButtonText = "New Item"
 
-	let day_display = "block";
-	let day_button_style = "background-color: grey";
+	let dayDisplay = "block";
+	let dayButtonStyle = "background-color: grey";
 
-	let week_display = "block";
-	let week_button_style = "background-color: grey";
+	let weekDisplay = "block";
+	let weekButtonStyle = "background-color: grey";
 
 	onMount(() => {
 		
@@ -50,35 +50,35 @@
 		}
 	};
 	$: if($inputing) {
-		item_button_text = "New Item";
-		item_button_style = "background-color: grey";
+		itemButtonText = "New Item";
+		itemButtonStyle = "background-color: grey";
 	}
 	else if($editing) {
-		item_button_text = "Edit Item";
-		item_button_style = "background-color: grey";
+		itemButtonText = "Edit Item";
+		itemButtonStyle = "background-color: grey";
 	}
 	else {
-		item_button_text = "New Item";
-		item_button_style = ""
+		itemButtonText = "New Item";
+		itemButtonStyle = ""
 	}
 	function dayOnClick() {
-		if(day_display === "none") {
-			day_display = "block"
-			day_button_style = "background-color: grey"
+		if(dayDisplay === "none") {
+			dayDisplay = "block"
+			dayButtonStyle = "background-color: grey"
 		}
 		else {
-			day_display = "none"
-			day_button_style = ""
+			dayDisplay = "none"
+			dayButtonStyle = ""
 		}
 	};
 	function weekOnClick() {
-		if(week_display === "none") {
-			week_display = "block"
-			week_button_style = "background-color: grey"
+		if(weekDisplay === "none") {
+			weekDisplay = "block"
+			weekButtonStyle = "background-color: grey"
 		}
 		else {
-			week_display = "none"
-			week_button_style = ""
+			weekDisplay = "none"
+			weekButtonStyle = ""
 		}
 	};
 	function todayOnClick() {
@@ -97,9 +97,9 @@
 	<div class="row">
 		<div class="col">
 			<div class="row">
-				<button style={item_button_style} on:click={newItemOnClick}>{item_button_text}</button>
-				<button class="d-none d-md-block" style={day_button_style} on:click={dayOnClick}>Day</button>
-				<button class="d-none d-md-block" style={week_button_style} on:click={weekOnClick}>Week</button>
+				<button style={itemButtonStyle} on:click={newItemOnClick}>{itemButtonText}</button>
+				<button class="d-none d-md-block" style={dayButtonStyle} on:click={dayOnClick}>Day</button>
+				<button class="d-none d-md-block" style={weekButtonStyle} on:click={weekOnClick}>Week</button>
 
 			</div>
 		</div>
@@ -129,11 +129,11 @@
 	<EditItem/>
 </div>
 {/if}
-<div style="display:{day_display}">
+<div style="display:{dayDisplay}">
 	<br>
 	<DayAgenda/>
 </div>
-<div style="display:{week_display}">
+<div style="display:{weekDisplay}">
 	<br>
 	<Week/>
 </div>

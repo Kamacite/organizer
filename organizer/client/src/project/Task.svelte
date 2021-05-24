@@ -1,5 +1,4 @@
 <script>
-import { onMount, tick } from "svelte";
 
 import { api_host, csrf_tok, flash_message, request, view } from "../app_store";
 import { submit_day_check, submit_week_check } from "../schedule/schedule_store";
@@ -7,18 +6,14 @@ import { active_project } from "./project_store";
 import Editor from "../editor/Editor.svelte";
 
 export let task = {};
-export let start_edit = false;
+export let startEdit = false;
 export let cancelNewTask;
 let hidden = false;
-let new_date;
-let new_time;
-$: editable = start_edit;
+let newDate;
+let newTime;
+$: editable = startEdit;
 $: scheduling= false;
 let editor;
-
-onMount(()=>{
-   
-});
 
 async function edit() {
     editable = true;
@@ -28,7 +23,7 @@ async function edit() {
 function cancel() {
     editable = false;
     editor.cancelEdit();
-    if (start_edit) {
+    if (startEdit) {
         //hidden = true;
         cancelNewTask(task.id);
     }
@@ -55,7 +50,7 @@ async function save() {
             let task_info = await res.json();
             task.id = task_info.id;
             task.details = new_task.details;
-            task.start_edit = false;
+            task.startEdit = false;
             editable = false;
             editor.stopEdit();
             $flash_message = ["success",""]
@@ -94,8 +89,8 @@ async function save() {
 async function scheduleTask() {
     let schedule_item = {
         title: $active_project.name,
-        item_date:new_date,
-        item_time:new_time,
+        item_date:newDate,
+        item_time:newTime,
         details: editor.getSanitizedContent(),
         active:true,
         reoccuring: false
@@ -119,8 +114,8 @@ async function scheduleTask() {
         if($view != "project") {
             $submit_day_check = null
             $submit_week_check = null
-            $submit_day_check = new_date
-            $submit_week_check = new_date
+            $submit_day_check = newDate
+            $submit_week_check = newDate
         }
         
 	} else {
@@ -136,10 +131,10 @@ async function scheduleTask() {
     {#if scheduling}
         <div class="row m-1">
             <div class="col p-0" align="center">
-                <input class="form-control-sm" id="item_date" type="date" bind:value={new_date}>
+                <input class="form-control-sm" id="item_date" type="date" bind:value={newDate}>
             </div>
             <div class="col p-0" align="right">
-                <input class="form-control-sm w-100" id="item_time" type="time" bind:value={new_time}>
+                <input class="form-control-sm w-100" id="item_time" type="time" bind:value={newTime}>
             </div>
         </div>
     {/if}
