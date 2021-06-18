@@ -23,7 +23,7 @@ async function edit() {
 function cancel() {
     editable = false;
     editor.cancelEdit();
-    if (startEdit) {
+    if (task.startEdit) {
         //hidden = true;
         cancelNewTask(task.id);
     }

@@ -37,7 +37,7 @@
     function addTask() {
         scrollWindow = true;
         scrollSection = true;
-        items.push({ id:newTaskID, start_edit:true, details: "", section_id: sectionID, position: items.length });
+        items.push({ id:newTaskID, startEdit:true, details: "", section_id: sectionID, position: items.length });
         items = items;
         newTaskID--;
     }
@@ -222,7 +222,7 @@
         {#each items as task(task.id)}
         <div animate:flip="{{duration: flipDurationMs}}">
             <div class="grip mt-1" on:mousedown={startDrag} on:touchstart={startDrag} on:mouseup={stopDrag} on:touchend={stopDrag}></div>
-            <Task task={task} startEdit={task.start_edit} cancelNewTask={cancelNewTask}/>
+            <Task task={task} startEdit={task.startEdit} cancelNewTask={cancelNewTask}/>
         </div>
         {/each}
         
