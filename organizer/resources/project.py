@@ -234,12 +234,25 @@ class Task(MethodView):
         else:
             task.details = task_updates.details
             task.active = task_updates.active
-
         task.last_updated = datetime.now().isoformat()
         task.updated_by = user_id
         db.session.commit()
         return task_schema.dump(task)
 
+    # Delete specified task, updating task positions in same section
     @jwt_required()
-    def delete(self):
-        pass
+    def delete(self, task_id):
+        user_id = get_jwt_identity()
+        error = task_schema.validate(request.json, session=db.session)
+        if error:
+            abort(400)
+        try:
+            task = db.session.query(mTask).filter(mTask.id == task_id, mTask.owner_id == user_id).one()
+        except:
+            abort(404)
+        task_updates = task_schema.load(request.json)    
+        self._order_tasks(task, task.section_id, task_updates.position)
+        db.session.delete(task)
+        db.session.commit()
+        return task_schema.dump(task)
+
