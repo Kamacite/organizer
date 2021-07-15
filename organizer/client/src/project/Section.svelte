@@ -10,6 +10,8 @@
     export let name = "";
     export let sectionID = "";
     export let items = [];
+    $: activeItems = items.filter(x => x.active === true);
+    $: doneItems = items.filter(x => x.active === false);
     let newTaskID = -1;
     let editing = false;
     let newSectionName = name;
@@ -17,6 +19,7 @@
     let scrollSection = false;
     let scrollWindow = false;
     let unlockDelete = false;
+    let showDone = false;
 
     const flipDurationMs = 300;
     let dragging;
@@ -35,9 +38,8 @@
     });
 
     function addTask() {
-        scrollWindow = true;
         scrollSection = true;
-        items.push({ id:newTaskID, startEdit:true, details: "", section_id: sectionID, position: items.length });
+        items.push({ id:newTaskID, startEdit:true, details: "", section_id: sectionID, position: activeItems.length, active: true });
         items = items;
         newTaskID--;
     }
@@ -138,34 +140,95 @@
         items = items;
     }
 
+async function deleteTask(taskID) {
+    let task_details = {
+        position: Number.MAX_SAFE_INTEGER
+    }
+    const res = await $request($api_host + "/task/" + taskID, {
+        credentials: "include",
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': $csrf_tok
+        },
+        body: JSON.stringify(task_details)
+    });
+    if(res.status === 200) {
+        //Get current section task is in index
+        //Get task index in section
+        let itemsIndex = items.findIndex(i=>i.id === taskID);
+        let activeIndex = activeItems.findIndex(i=>i.id === taskID);
+        let lastPosition = activeItems[activeIndex].position;
+        //Remove task from that section
+        items.splice(itemsIndex, 1);
+        activeItems = items.filter(x => x.active === true);
+        for( let i = lastPosition; i<activeItems.length; i++) {
+            activeItems[i].position = i;
+        }
+        items = items;
+        $flash_message = ["success", "Task was successfully deleted."]
+    }
+    else {
+        $flash_message = ["failure", "Failed to delete task."]
+    }
+}
+    
+    async function markTaskDone(taskID) {
+    let task_details = {
+        active: false,
+        position: Number.MAX_SAFE_INTEGER
+    };
+    const res = await $request($api_host + "/task/" + taskID, {
+        credentials: "include",
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': $csrf_tok
+        },
+        body: JSON.stringify(task_details)
+    });
+    if(res.status === 200) {
+        //Get task index in section
+        let taskIndex = items.findIndex(i=>i.id === taskID);
+        //Remove task from that section
+        items[taskIndex].active = false;
+        activeItems = items.filter(x => x.active === true);
+        for (let i = 0; i < activeItems.length; i++) {
+            activeItems[i].position = i;
+        }
+        $flash_message = ["success", "Task completed."]
+    }
+    else {
+        $flash_message = ["failure", "Failed to complete task."]
+    }
+}
     // Used for svelte dnd
     function handleConsider(e) {
-        items = e.detail.items
+        activeItems = e.detail.items
     }
     // Used for svelte dnd
     async function handleFinal(e) {
-        items = e.detail.items;
+        activeItems = e.detail.items;
         dragging = false;
         let dragged_id = e.detail.info.id;
-        let item_index = items.findIndex(i=>i.id === dragged_id)
+        let item_index = activeItems.findIndex(i=>i.id === dragged_id)
         if( item_index != -1) {
-            if (items[item_index].section_id === sectionID && items[item_index].position === item_index) {
+            if (activeItems[item_index].section_id === sectionID && activeItems[item_index].position === item_index) {
                 // Task has not moved so don't patch
                 return;
             }
-            items[item_index].section_id = sectionID;
+            activeItems[item_index].section_id = sectionID;
             let task_updates = {
                 section_id: sectionID,
-                position: item_index,
-                active: true,
+                position: item_index
             };
-            patchTaskPosition(items[item_index].id, task_updates);
+            patchTaskPosition(activeItems[item_index].id, task_updates);
         }
-        for(let i = 0; i < items.length; i++) {
-            items[i].position = i;
+        for(let i = 0; i < activeItems.length; i++) {
+            activeItems[i].position = i
         }
         //keep order when moving section
-        section.tasks = items;
+        
     }
 
     // Used for svelte dnd
@@ -191,10 +254,22 @@
                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
                     </svg>
                 </span>
-
+                
             </h4>
             <div class="col" align="right">
-                <button type="button" class="btn-sm btn-light m-1" on:click={addTask}>New Item</button>
+                {#if doneItems.length > 0}
+                <span type="button" title="Toggle Show Done" on:click={()=>showDone=!showDone}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" fill="currentColor" class="bi bi-check2-square" viewBox="0 0 16 16">
+                    <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5H3z"/>
+                    <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                    </svg>
+                </span>
+                {/if}
+                <button type="button" title="New Task" align="center" class="btn-sm btn-light m-1" on:click={addTask}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path d="M8 0a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2H9v6a1 1 0 1 1-2 0V9H1a1 1 0 0 1 0-2h6V1a1 1 0 0 1 1-1z"/>
+                    </svg>
+                </button>
             </div>
         {/if}
         {#if editing}
@@ -214,19 +289,29 @@
         </div>
         {/if}
     </div>
-    <section class="section col p-1" style="background-color: {section.active ? 'slategrey' : 'crimson'}"
-        use:dndzone={{items, dragDisabled, flipDurationMs}} 
+    <div class="section col p-1" style="background-color: {section.active ? 'slategrey' : 'crimson'}">
+    <!-- Active Task Display-->
+    <section
+        use:dndzone={{"items": activeItems, dragDisabled, flipDurationMs}} 
         on:consider={handleConsider} 
         on:finalize={handleFinal}
         bind:this={sectionElement}>
-        {#each items as task(task.id)}
+        {#each activeItems as task(task.id)}
         <div animate:flip="{{duration: flipDurationMs}}">
             <div class="grip mt-1" on:mousedown={startDrag} on:touchstart={startDrag} on:mouseup={stopDrag} on:touchend={stopDrag}></div>
-            <Task task={task} startEdit={task.startEdit} cancelNewTask={cancelNewTask}/>
+            <Task task={task} startEdit={task.startEdit} cancelNewTask={cancelNewTask} markTaskDone={markTaskDone} deleteTask={deleteTask}/>
         </div>
         {/each}
-        
     </section>
+    <!-- Done Tasks -->
+    {#if doneItems.length > 0 && showDone}
+    <div class="mt-1"><h5>Completed Tasks</h5></div>
+        {#each doneItems as task(task.id)}
+            <div class="done-topper mt-1"></div>
+            <Task task={task} startEdit={task.startEdit} cancelNewTask={cancelNewTask}/>
+        {/each}
+    {/if}
+    </div>
     {#if !section.active}
     <div class="p-1" style="background-color: rgb(115, 6, 25);border-radius: 0em 0em 1em 1em;" align="center">
     <div class="form-check form-check-inline">
@@ -246,6 +331,12 @@
         width: 100%;
         height: 1em;
         background-color: lightgray;
+    }
+    .done-topper {
+        border-radius: 1em 1em 0em 0em;
+        width: 100%;
+        height: 1em;
+        background-color: grey;
     }
     .section {
         max-width: 20em;

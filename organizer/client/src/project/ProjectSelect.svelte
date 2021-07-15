@@ -129,7 +129,7 @@ async function selectProject(project) {
     <div class="row m-0 project-list">
         {#each $project_list as proj }
             {#if proj.active}
-            <div class="col project mr-2 mt-2" on:click={()=>selectProject(proj)}>
+            <div class="col project mr-2 mt-2 pt-2" on:click={()=>selectProject(proj)}>
                 <h4>{proj.name}</h4>
                 <p>{proj.details}</p>
             </div>

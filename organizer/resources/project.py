@@ -3,6 +3,8 @@ from flask import jsonify, request, abort
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import *
+
+from sqlalchemy.sql.expression import true
 from ..models.project_models import Project as mProject, Section as mSection, Task as mTask
 from ..models.project_schemas import project_schema, section_schema, task_schema
 from organizer import db
@@ -190,13 +192,15 @@ class Task(MethodView):
         # Moved to new section
         if (task.section_id != new_section_id):
             try:
-                old_section_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, mTask.position > task.position).all()
+                old_section_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, 
+                                            mTask.position > task.position, mTask.active == True).all()
                 for t in old_section_tasks:
                     t.position = t.position - 1
             except:
                 pass
             try:
-                new_section_tasks = db.session.query(mTask).filter(mTask.section_id == new_section_id, mTask.position >= new_position).all()
+                new_section_tasks = db.session.query(mTask).filter(mTask.section_id == new_section_id, 
+                                            mTask.position >= new_position, mTask.active == True).all()
                 for t in new_section_tasks:
                     t.position = t.position + 1
             except:
@@ -206,13 +210,15 @@ class Task(MethodView):
         # Same section
         elif (task.position > new_position):
             #Moved to lower position
-            update_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, mTask.position >= new_position, mTask.position < task.position).all()
+            update_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, 
+                                mTask.position >= new_position, mTask.position < task.position, mTask.active == True).all()
             for t in update_tasks:
                 t.position = t.position + 1
             task.position = new_position
         elif (task.position < new_position):
             #Moved to higher position
-            update_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, mTask.position <= new_position, mTask.position > task.position).all()
+            update_tasks = db.session.query(mTask).filter(mTask.section_id == task.section_id, 
+                                mTask.position <= new_position, mTask.position > task.position, mTask.active == True).all()
             for t in update_tasks:
                 t.position = t.position - 1
             task.position = new_position
@@ -229,11 +235,22 @@ class Task(MethodView):
         except:
             abort(404)
         task_updates = task_schema.load(request.json)
-        if ( (task.position != task_updates.position or task.section_id != task_updates.section_id) and task_updates.position != None and task_updates.section_id != None):
+        # Task marked done
+        if (task_updates.active == False and task_updates.active != None):
+            #Reorder active tasks
+            self._order_tasks(task, task.section_id, task_updates.position)
+            task.active = False
+        # Task marked undone
+        elif (task_updates.active == True) and task_updates.active != None:
+            task.active = True
+            task.position = task_updates.position
+        # Task position change
+        elif ( (task.position != task_updates.position or task.section_id != task_updates.section_id) and task_updates.position != None and task_updates.section_id != None):
             self._order_tasks(task, task_updates.section_id, task_updates.position)
-        else:
+        #Task details saved
+        elif (task_updates.details != None):
             task.details = task_updates.details
-            task.active = task_updates.active
+            
         task.last_updated = datetime.now().isoformat()
         task.updated_by = user_id
         db.session.commit()
